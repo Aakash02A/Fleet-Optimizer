@@ -1,0 +1,156 @@
+<!-- Settings Module View -->
+<div class="module-content">
+    <div class="settings-grid">
+        <!-- Threshold Settings -->
+        <div class="card settings-card">
+            <div class="card-header">
+                <h3 class="card-title">Alert Thresholds</h3>
+            </div>
+            <div class="card-body">
+                <div class="settings-group">
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <label class="setting-label">Low Fuel Warning</label>
+                            <span class="setting-description">Alert when fuel drops below this level</span>
+                        </div>
+                        <div class="setting-control">
+                            <input type="range" class="setting-slider" id="lowFuelThreshold" min="5" max="50" value="20">
+                            <span class="setting-value" id="lowFuelValue">20%</span>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <label class="setting-label">Critical Fuel Level</label>
+                            <span class="setting-description">Alert for critically low fuel</span>
+                        </div>
+                        <div class="setting-control">
+                            <input type="range" class="setting-slider" id="criticalFuelThreshold" min="1" max="20" value="10">
+                            <span class="setting-value" id="criticalFuelValue">10%</span>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <label class="setting-label">Sudden Drop Detection</label>
+                            <span class="setting-description">Alert when fuel drops suddenly by this amount</span>
+                        </div>
+                        <div class="setting-control">
+                            <input type="range" class="setting-slider" id="suddenDropThreshold" min="2" max="20" value="5">
+                            <span class="setting-value" id="suddenDropValue">5%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notification Settings -->
+        <div class="card settings-card">
+            <div class="card-header">
+                <h3 class="card-title">Notifications</h3>
+            </div>
+            <div class="card-body">
+                <div class="settings-group">
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <label class="setting-label">Enable Alerts</label>
+                            <span class="setting-description">Master toggle for all alerts</span>
+                        </div>
+                        <div class="setting-control">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="enableAlerts" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <label class="setting-label">Low Fuel Alerts</label>
+                            <span class="setting-description">Notify when fuel is low</span>
+                        </div>
+                        <div class="setting-control">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="lowFuelAlerts" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <label class="setting-label">Theft Detection Alerts</label>
+                            <span class="setting-description">Alert on sudden fuel drops</span>
+                        </div>
+                        <div class="setting-control">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="theftAlerts" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- GPS Settings -->
+        <div class="card settings-card">
+            <div class="card-header">
+                <h3 class="card-title">GPS Settings</h3>
+            </div>
+            <div class="card-body">
+                <div class="settings-group">
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <label class="setting-label">Enable GPS Tracking</label>
+                            <span class="setting-description">Track vehicle locations</span>
+                        </div>
+                        <div class="setting-control">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="enableGPS" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <label class="setting-label">GPS Signal Lost Alert</label>
+                            <span class="setting-description">Alert when GPS signal is lost</span>
+                        </div>
+                        <div class="setting-control">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="gpsLostAlert" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Settings -->
+        <div class="card settings-card">
+            <div class="card-header">
+                <h3 class="card-title">System</h3>
+            </div>
+            <div class="card-body">
+                <div class="settings-group">
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <label class="setting-label">Update Interval</label>
+                            <span class="setting-description">How often to refresh data</span>
+                        </div>
+                        <div class="setting-control">
+                            <select class="setting-select" id="updateInterval">
+                                <option value="1000">1 second</option>
+                                <option value="3000" selected>3 seconds</option>
+                                <option value="5000">5 seconds</option>
+                                <option value="10000">10 seconds</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="settings-actions">
+                    <button class="btn-secondary" id="resetSettings">Reset to Defaults</button>
+                    <button class="btn-primary" id="saveSettings">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

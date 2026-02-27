@@ -1,0 +1,490 @@
+<!-- Dashboard Module View -->
+<div class="module-content">
+    <!-- Quick Stats Bar -->
+    <section class="quick-stats-bar">
+        <div class="quick-stat">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                <path d="M16 3H1V16H16V3Z" stroke="currentColor" stroke-width="2"/>
+                <path d="M16 8H20L23 11V16H16V8Z" stroke="currentColor" stroke-width="2"/>
+                <circle cx="5.5" cy="18.5" r="2.5" stroke="currentColor" stroke-width="2"/>
+                <circle cx="18.5" cy="18.5" r="2.5" stroke="currentColor" stroke-width="2"/>
+            </svg>
+            <span class="quick-stat-label">Fleet Size:</span>
+            <span class="quick-stat-value" id="dashFleetSize">4 vehicles</span>
+        </div>
+        <div class="quick-stat">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                <path d="M12 6V12L16 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <span class="quick-stat-label">Today's Distance:</span>
+            <span class="quick-stat-value" id="dashTodayDistance">-- km</span>
+        </div>
+        <div class="quick-stat">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                <path d="M3 22V8L6 2H14L17 8V22H3Z" stroke="currentColor" stroke-width="2"/>
+                <path d="M3 12H17" stroke="currentColor" stroke-width="2"/>
+            </svg>
+            <span class="quick-stat-label">Fuel Used Today:</span>
+            <span class="quick-stat-value" id="dashFuelUsed">-- L</span>
+        </div>
+        <div class="quick-stat status-indicator-live">
+            <span class="live-dot"></span>
+            <span class="quick-stat-label">System:</span>
+            <span class="quick-stat-value">Online</span>
+        </div>
+    </section>
+
+    <!-- KPI Section -->
+    <section class="kpi-section">
+        <div class="kpi-grid">
+            <!-- Fuel Level KPI -->
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <div class="kpi-icon fuel-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path d="M3 22V8L6 2H14L17 8V22H3Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M3 12H17" stroke="currentColor" stroke-width="2"/>
+                            <path d="M17 12H19C20.1046 12 21 12.8954 21 14V17C21 18.1046 20.1046 19 19 19H17" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                    </div>
+                    <span class="kpi-label">Fuel Level</span>
+                </div>
+                <div class="kpi-body">
+                    <div class="kpi-value-wrapper">
+                        <span class="kpi-value" id="fuelValue">--</span>
+                        <span class="kpi-unit">%</span>
+                    </div>
+                    <div class="fuel-progress-container">
+                        <div class="fuel-progress-bar">
+                            <div class="fuel-progress-fill" id="fuelProgress" style="width: 0%;"></div>
+                        </div>
+                        <div class="fuel-progress-labels">
+                            <span>Empty</span>
+                            <span>Full</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="kpi-footer">
+                    <div class="kpi-trend trend-neutral" id="fuelTrend">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                            <path d="M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                        <span>Monitoring</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Efficiency KPI -->
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <div class="kpi-icon efficiency-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path d="M22 12H18L15 21L9 3L6 12H2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <span class="kpi-label">Fuel Efficiency</span>
+                </div>
+                <div class="kpi-body">
+                    <div class="kpi-value-wrapper">
+                        <span class="kpi-value" id="efficiencyValue">--</span>
+                        <span class="kpi-unit">km/L</span>
+                    </div>
+                    <div class="efficiency-gauge">
+                        <div class="gauge-segments">
+                            <div class="gauge-segment segment-poor"></div>
+                            <div class="gauge-segment segment-average"></div>
+                            <div class="gauge-segment segment-good"></div>
+                            <div class="gauge-segment segment-excellent"></div>
+                        </div>
+                        <div class="gauge-marker" id="efficiencyMarker" style="left: 50%;"></div>
+                    </div>
+                </div>
+                <div class="kpi-footer">
+                    <div class="kpi-trend trend-up" id="efficiencyTrend">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                            <path d="M18 15L12 9L6 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <span>+2.3% vs avg</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Range KPI -->
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <div class="kpi-icon range-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                            <path d="M12 6V12L16 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <span class="kpi-label">Est. Range</span>
+                </div>
+                <div class="kpi-body">
+                    <div class="kpi-value-wrapper">
+                        <span class="kpi-value" id="rangeValue">--</span>
+                        <span class="kpi-unit">km</span>
+                    </div>
+                    <div class="range-indicator">
+                        <div class="range-bar">
+                            <div class="range-fill" id="rangeFill" style="width: 0%;"></div>
+                        </div>
+                        <div class="range-labels">
+                            <span>0 km</span>
+                            <span>600 km</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="kpi-footer">
+                    <div class="kpi-trend trend-neutral">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                            <path d="M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                        <span>Based on current efficiency</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Status KPI -->
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <div class="kpi-icon status-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" stroke-width="2"/>
+                            <path d="M12 6V12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            <path d="M12 16H12.01" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <span class="kpi-label">System Status</span>
+                </div>
+                <div class="kpi-body">
+                    <div class="status-display" id="statusDisplay">
+                        <span class="status-indicator status-normal"></span>
+                        <span class="status-text" id="statusText">Normal</span>
+                    </div>
+                    <div class="status-details">
+                        <div class="status-item">
+                            <span class="status-item-label">Engine</span>
+                            <span class="status-item-value" id="engineStatus">Running</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-item-label">GPS</span>
+                            <span class="status-item-value" id="gpsStatus">Strong</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="kpi-footer">
+                    <span class="kpi-trend trend-neutral" id="statusUptime">
+                        System uptime: 99.8%
+                    </span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Grid -->
+    <section class="main-grid">
+        <!-- Map Card -->
+        <div class="card map-card">
+            <div class="card-header">
+                <h3 class="card-title">Live Location</h3>
+                <div class="card-actions">
+                    <div class="location-badge">
+                        <span class="pulse-dot"></span>
+                        <span>Live</span>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="map-container" id="mapContainer">
+                    <div class="map-placeholder">
+                        <div class="map-grid"></div>
+                        <div class="map-marker" id="mapMarker">
+                            <div class="marker-pulse"></div>
+                            <div class="marker-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                    <path d="M12 2C8.13 2 5 5.13 5 9C5 14.25 12 22 12 22C12 22 19 14.25 19 9C19 5.13 15.87 2 12 2Z" fill="currentColor"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="map-overlay">
+                            <span class="map-notice">Map integration ready</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="coordinates-panel">
+                    <div class="coord-item">
+                        <span class="coord-label">Latitude</span>
+                        <span class="coord-value" id="latValue">--</span>
+                    </div>
+                    <div class="coord-item">
+                        <span class="coord-label">Longitude</span>
+                        <span class="coord-value" id="lonValue">--</span>
+                    </div>
+                    <div class="coord-item">
+                        <span class="coord-label">Speed</span>
+                        <span class="coord-value" id="speedValue">-- km/h</span>
+                    </div>
+                    <div class="coord-item">
+                        <span class="coord-label">Heading</span>
+                        <span class="coord-value" id="headingValue">--</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alerts Card -->
+        <div class="card alerts-card">
+            <div class="card-header">
+                <h3 class="card-title">Recent Alerts</h3>
+                <span class="alert-count" id="alertCount">0 Active</span>
+            </div>
+            <div class="card-body">
+                <div class="alerts-list" id="alertsList">
+                    <div class="alert-empty" id="alertEmpty">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
+                            <path d="M22 11.08V12C21.9988 14.1564 21.3005 16.2547 20.0093 17.9818C18.7182 19.709 16.9033 20.9725 14.8354 21.5839C12.7674 22.1953 10.5573 22.1219 8.53447 21.3746C6.51168 20.6273 4.78465 19.2461 3.61096 17.4371C2.43727 15.628 1.87979 13.4881 2.02168 11.3363C2.16356 9.18455 2.99721 7.13631 4.39828 5.49706C5.79935 3.85781 7.69279 2.71537 9.79619 2.24013C11.8996 1.7649 14.1003 1.98232 16.07 2.85999" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M22 4L12 14.01L9 11.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <span>No active alerts</span>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <a href="#" class="view-all-link" id="viewAllAlertsLink">View All Alerts →</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Chart Section -->
+    <section class="chart-section">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Fuel Level History</h3>
+                <div class="time-filter">
+                    <button class="filter-btn active" data-range="24h">24H</button>
+                    <button class="filter-btn" data-range="7d">7D</button>
+                    <button class="filter-btn" data-range="30d">30D</button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <div class="chart-canvas">
+                        <div class="chart-y-axis">
+                            <span>100%</span>
+                            <span>75%</span>
+                            <span>50%</span>
+                            <span>25%</span>
+                            <span>0%</span>
+                        </div>
+                        <div class="chart-area" id="chartArea"></div>
+                    </div>
+                    <div class="chart-x-axis" id="chartXAxis"></div>
+                </div>
+                <div class="chart-legend">
+                    <div class="legend-item">
+                        <div class="legend-color fuel-color"></div>
+                        <span class="legend-label">Fuel Level</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color consumption-color"></div>
+                        <span class="legend-label">Consumption Rate</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Vehicle Details & Consumption Section -->
+    <section class="details-grid">
+        <!-- Selected Vehicle Info -->
+        <div class="card vehicle-info-card">
+            <div class="card-header">
+                <h3 class="card-title">Vehicle Information</h3>
+                <span class="vehicle-type-badge" id="vehicleTypeBadge">Heavy Truck</span>
+            </div>
+            <div class="card-body">
+                <div class="vehicle-info-grid">
+                    <div class="info-item">
+                        <span class="info-label">Vehicle ID</span>
+                        <span class="info-value mono" id="infoVehicleId">--</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Vehicle Name</span>
+                        <span class="info-value" id="infoVehicleName">--</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Tank Capacity</span>
+                        <span class="info-value" id="infoTankCapacity">-- L</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Current Fuel</span>
+                        <span class="info-value" id="infoCurrentFuel">-- L</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Driver Assigned</span>
+                        <span class="info-value" id="infoDriver">Not Assigned</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Last Service</span>
+                        <span class="info-value" id="infoLastService">15 days ago</span>
+                    </div>
+                </div>
+                <div class="vehicle-quick-actions">
+                    <button class="quick-action-btn" id="btnTrackVehicle">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                            <path d="M12 2C8.13 2 5 5.13 5 9C5 14.25 12 22 12 22C12 22 19 14.25 19 9C19 5.13 15.87 2 12 2Z" stroke="currentColor" stroke-width="2"/>
+                            <circle cx="12" cy="9" r="2" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                        Track
+                    </button>
+                    <button class="quick-action-btn" id="btnViewHistory">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                            <path d="M12 6V12L16 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                        History
+                    </button>
+                    <button class="quick-action-btn" id="btnRefuelLog">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                            <path d="M3 22V8L6 2H14L17 8V22H3Z" stroke="currentColor" stroke-width="2"/>
+                            <path d="M3 12H17" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                        Refuel Log
+                    </button>
+                    <button class="quick-action-btn" id="btnServiceLog">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                        Service
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Consumption Stats -->
+        <div class="card consumption-card">
+            <div class="card-header">
+                <h3 class="card-title">Consumption Analytics</h3>
+            </div>
+            <div class="card-body">
+                <div class="consumption-stats">
+                    <div class="consumption-stat">
+                        <div class="consumption-icon avg">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                <path d="M22 12H18L15 21L9 3L6 12H2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                        </div>
+                        <div class="consumption-info">
+                            <span class="consumption-value" id="avgConsumption">--</span>
+                            <span class="consumption-label">Avg. Consumption (L/100km)</span>
+                        </div>
+                    </div>
+                    <div class="consumption-stat">
+                        <div class="consumption-icon today">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                <rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2"/>
+                                <path d="M16 2V6M8 2V6M3 10H21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                        </div>
+                        <div class="consumption-info">
+                            <span class="consumption-value" id="todayConsumption">--</span>
+                            <span class="consumption-label">Today's Consumption (L)</span>
+                        </div>
+                    </div>
+                    <div class="consumption-stat">
+                        <div class="consumption-icon week">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                <path d="M18 20V10M12 20V4M6 20V14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                        </div>
+                        <div class="consumption-info">
+                            <span class="consumption-value" id="weekConsumption">--</span>
+                            <span class="consumption-label">This Week (L)</span>
+                        </div>
+                    </div>
+                    <div class="consumption-stat">
+                        <div class="consumption-icon cost">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                                <path d="M12 6V18M9 9C9 7.9 10.3 7 12 7s3 .9 3 2-1.3 2-3 2-3 .9-3 2 1.3 2 3 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                        </div>
+                        <div class="consumption-info">
+                            <span class="consumption-value" id="fuelCost">₹--</span>
+                            <span class="consumption-label">Est. Monthly Cost</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="consumption-comparison">
+                    <div class="comparison-header">
+                        <span>Efficiency vs Fleet Average</span>
+                        <span class="comparison-badge positive" id="efficiencyComparison">+5.2%</span>
+                    </div>
+                    <div class="comparison-bar">
+                        <div class="comparison-fill" id="efficiencyComparisonBar" style="width: 65%;"></div>
+                        <div class="comparison-marker" id="fleetAvgMarker" style="left: 50%;"></div>
+                    </div>
+                    <div class="comparison-labels">
+                        <span>Poor</span>
+                        <span>Fleet Avg</span>
+                        <span>Excellent</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Trip Summary -->
+    <section class="trip-section">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Recent Trips</h3>
+                <button class="btn-link" id="viewAllTrips">View All →</button>
+            </div>
+            <div class="card-body">
+                <div class="trips-table-wrapper">
+                    <table class="trips-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Start Location</th>
+                                <th>End Location</th>
+                                <th>Distance</th>
+                                <th>Fuel Used</th>
+                                <th>Efficiency</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tripsTableBody">
+                            <tr>
+                                <td>Today, 09:30</td>
+                                <td>Chennai Depot</td>
+                                <td>Bangalore Hub</td>
+                                <td>346 km</td>
+                                <td>28.8 L</td>
+                                <td><span class="efficiency-badge good">12.0 km/L</span></td>
+                            </tr>
+                            <tr>
+                                <td>Yesterday, 14:15</td>
+                                <td>Bangalore Hub</td>
+                                <td>Mysore Center</td>
+                                <td>152 km</td>
+                                <td>11.7 L</td>
+                                <td><span class="efficiency-badge excellent">13.0 km/L</span></td>
+                            </tr>
+                            <tr>
+                                <td>Yesterday, 08:00</td>
+                                <td>Chennai Depot</td>
+                                <td>Vellore Point</td>
+                                <td>134 km</td>
+                                <td>10.3 L</td>
+                                <td><span class="efficiency-badge good">13.0 km/L</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>

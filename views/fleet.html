@@ -1,0 +1,248 @@
+<!-- Fleet Module View -->
+<div class="module-content">
+    <!-- Fleet Stats -->
+    <section class="fleet-header">
+        <div class="fleet-stats">
+            <div class="fleet-stat-card">
+                <div class="fleet-stat-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <path d="M16 3H1V16H16V3Z" stroke="currentColor" stroke-width="2"/>
+                        <path d="M16 8H20L23 11V16H16V8Z" stroke="currentColor" stroke-width="2"/>
+                        <circle cx="5.5" cy="18.5" r="2.5" stroke="currentColor" stroke-width="2"/>
+                        <circle cx="18.5" cy="18.5" r="2.5" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                </div>
+                <div class="fleet-stat-content">
+                    <span class="fleet-stat-value" id="totalVehicles">4</span>
+                    <span class="fleet-stat-label">Total Vehicles</span>
+                </div>
+            </div>
+            <div class="fleet-stat-card">
+                <div class="fleet-stat-icon success">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <path d="M22 11.08V12C21.9988 14.1564 21.3005 16.2547 20.0093 17.9818C18.7182 19.709 16.9033 20.9725 14.8354 21.5839C12.7674 22.1953 10.5573 22.1219 8.53447 21.3746C6.51168 20.6273 4.78465 19.2461 3.61096 17.4371C2.43727 15.628 1.87979 13.4881 2.02168 11.3363C2.16356 9.18455 2.99721 7.13631 4.39828 5.49706C5.79935 3.85781 7.69279 2.71537 9.79619 2.24013C11.8996 1.7649 14.1003 1.98232 16.07 2.85999" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M22 4L12 14.01L9 11.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div class="fleet-stat-content">
+                    <span class="fleet-stat-value" id="normalVehicles">3</span>
+                    <span class="fleet-stat-label">Normal Status</span>
+                </div>
+            </div>
+            <div class="fleet-stat-card">
+                <div class="fleet-stat-icon warning">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <path d="M12 9V13M12 17H12.01M5.07 19H18.93C20.4 19 21.36 17.44 20.63 16.18L13.7 4.18C12.97 2.93 11.03 2.93 10.3 4.18L3.37 16.18C2.64 17.44 3.6 19 5.07 19Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div class="fleet-stat-content">
+                    <span class="fleet-stat-value" id="alertVehicles">1</span>
+                    <span class="fleet-stat-label">Needs Attention</span>
+                </div>
+            </div>
+            <div class="fleet-stat-card">
+                <div class="fleet-stat-icon info">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <path d="M22 12H18L15 21L9 3L6 12H2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div class="fleet-stat-content">
+                    <span class="fleet-stat-value" id="avgEfficiency">13.5</span>
+                    <span class="fleet-stat-label">Avg Efficiency (km/L)</span>
+                </div>
+            </div>
+            <div class="fleet-stat-card">
+                <div class="fleet-stat-icon primary">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <path d="M12 2C8.13 2 5 5.13 5 9C5 14.25 12 22 12 22C12 22 19 14.25 19 9C19 5.13 15.87 2 12 2Z" stroke="currentColor" stroke-width="2"/>
+                        <circle cx="12" cy="9" r="2" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                </div>
+                <div class="fleet-stat-content">
+                    <span class="fleet-stat-value" id="activeVehicles">4</span>
+                    <span class="fleet-stat-label">Currently Active</span>
+                </div>
+            </div>
+            <div class="fleet-stat-card">
+                <div class="fleet-stat-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <path d="M3 22V8L6 2H14L17 8V22H3Z" stroke="currentColor" stroke-width="2"/>
+                        <path d="M3 12H17" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                </div>
+                <div class="fleet-stat-content">
+                    <span class="fleet-stat-value" id="totalFuelCapacity">630</span>
+                    <span class="fleet-stat-label">Total Capacity (L)</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Fleet Toolbar -->
+    <section class="fleet-toolbar">
+        <div class="toolbar-left">
+            <div class="filter-group">
+                <button class="filter-chip active" data-filter="all">
+                    All Vehicles
+                    <span class="chip-count" id="filterAllCount">4</span>
+                </button>
+                <button class="filter-chip" data-filter="normal">
+                    <span class="chip-dot success"></span>
+                    Normal
+                    <span class="chip-count" id="filterNormalCount">3</span>
+                </button>
+                <button class="filter-chip" data-filter="warning">
+                    <span class="chip-dot warning"></span>
+                    Warning
+                    <span class="chip-count" id="filterWarningCount">1</span>
+                </button>
+                <button class="filter-chip" data-filter="danger">
+                    <span class="chip-dot danger"></span>
+                    Critical
+                    <span class="chip-count" id="filterDangerCount">0</span>
+                </button>
+            </div>
+        </div>
+        <div class="toolbar-right">
+            <div class="search-box">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                    <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2"/>
+                    <path d="M21 21L16.65 16.65" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                <input type="text" placeholder="Search vehicles..." id="fleetSearch">
+            </div>
+            <button class="toolbar-btn" id="btnExportFleet" title="Export to CSV">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                    <path d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M7 10L12 15L17 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M12 15V3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                Export
+            </button>
+            <button class="toolbar-btn primary" id="btnAddVehicle" title="Add Vehicle">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                    <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                Add Vehicle
+            </button>
+        </div>
+    </section>
+
+    <!-- Fleet Table -->
+    <section class="fleet-table-section">
+        <div class="card fleet-table-card">
+            <div class="card-header">
+                <h3 class="card-title">All Vehicles</h3>
+                <div class="table-info">
+                    <span id="showingCount">Showing 4 of 4 vehicles</span>
+                </div>
+            </div>
+            <div class="card-body fleet-table-body">
+                <div class="fleet-table-wrapper">
+                    <table class="fleet-table">
+                        <thead>
+                            <tr>
+                                <th class="sortable" data-sort="id">
+                                    Vehicle ID
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                                        <path d="M8 10L12 6L16 10M8 14L12 18L16 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                    </svg>
+                                </th>
+                                <th>Name</th>
+                                <th>Type</th>
+                                <th class="sortable" data-sort="fuel">
+                                    Fuel Level
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                                        <path d="M8 10L12 6L16 10M8 14L12 18L16 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                    </svg>
+                                </th>
+                                <th>Range</th>
+                                <th class="sortable" data-sort="efficiency">
+                                    Efficiency
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                                        <path d="M8 10L12 6L16 10M8 14L12 18L16 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                    </svg>
+                                </th>
+                                <th>Speed</th>
+                                <th>Status</th>
+                                <th>Location</th>
+                                <th>Last Update</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="fleetTableBody">
+                            <!-- Populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer">
+                <div class="pagination">
+                    <button class="pagination-btn" disabled>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                            <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </button>
+                    <span class="pagination-info">Page 1 of 1</span>
+                    <button class="pagination-btn" disabled>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                            <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Fleet Map Overview -->
+    <section class="fleet-map-section">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Fleet Location Overview</h3>
+                <div class="card-actions">
+                    <button class="btn-icon" id="btnRefreshMap" title="Refresh Map">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                            <path d="M23 4V10H17M1 20V14H7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            <path d="M3.51 9C4.01717 7.56678 4.87913 6.2854 6.01547 5.27542C7.1518 4.26543 8.52547 3.55976 10.0083 3.22426C11.4911 2.88875 13.0348 2.93434 14.4952 3.35677C15.9556 3.77921 17.2853 4.56471 18.36 5.64L23 10M1 14L5.64 18.36C6.71475 19.4353 8.04437 20.2208 9.50481 20.6432C10.9652 21.0657 12.5089 21.1112 13.9917 20.7757C15.4745 20.4402 16.8482 19.7346 17.9845 18.7246C19.1209 17.7146 19.9828 16.4332 20.49 15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </button>
+                    <button class="btn-icon" id="btnFullscreenMap" title="Fullscreen">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                            <path d="M8 3H5C3.89543 3 3 3.89543 3 5V8M21 8V5C21 3.89543 20.1046 3 19 3H16M16 21H19C20.1046 21 21 20.1046 21 19V16M3 16V19C3 20.1046 3.89543 21 5 21H8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="fleet-map-container" id="fleetMapContainer">
+                    <div class="fleet-map-placeholder">
+                        <div class="map-grid"></div>
+                        <!-- Vehicle markers will be added dynamically -->
+                        <div class="fleet-markers" id="fleetMarkers"></div>
+                        <div class="map-overlay">
+                            <span class="map-notice">Fleet map - showing all vehicle locations</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="fleet-map-legend">
+                    <div class="legend-item">
+                        <span class="legend-marker normal"></span>
+                        <span>Normal</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-marker warning"></span>
+                        <span>Warning</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-marker danger"></span>
+                        <span>Critical</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-marker idle"></span>
+                        <span>Idle</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>

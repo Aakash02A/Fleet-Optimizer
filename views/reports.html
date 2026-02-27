@@ -1,0 +1,87 @@
+<!-- Reports Module View -->
+<div class="module-content">
+    <!-- Report Period Filter -->
+    <section class="reports-filter-bar">
+        <div class="report-period-filter">
+            <button class="period-btn active" data-period="today">Today</button>
+            <button class="period-btn" data-period="week">This Week</button>
+            <button class="period-btn" data-period="month">This Month</button>
+            <button class="period-btn" data-period="custom">Custom</button>
+        </div>
+    </section>
+
+    <!-- Reports Grid -->
+    <section class="reports-grid">
+        <!-- Fuel Summary -->
+        <div class="card report-card">
+            <div class="card-header">
+                <h3 class="card-title">Fuel Consumption Summary</h3>
+            </div>
+            <div class="card-body">
+                <div class="report-metric-large">
+                    <span class="report-value" id="totalFuelConsumed">--</span>
+                    <span class="report-unit">Liters</span>
+                </div>
+                <div class="report-comparison">
+                    <span class="comparison-badge positive" id="fuelCompare">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                            <path d="M18 15L12 9L6 15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                        8% less than last period
+                    </span>
+                </div>
+                <div class="report-breakdown" id="fuelBreakdown">
+                    <!-- Populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Efficiency Trends -->
+        <div class="card report-card">
+            <div class="card-header">
+                <h3 class="card-title">Efficiency Trends</h3>
+            </div>
+            <div class="card-body">
+                <div class="efficiency-trends" id="efficiencyTrends">
+                    <!-- Populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Distance Report -->
+        <div class="card report-card">
+            <div class="card-header">
+                <h3 class="card-title">Distance Traveled</h3>
+            </div>
+            <div class="card-body">
+                <div class="report-metric-large">
+                    <span class="report-value" id="totalDistance">--</span>
+                    <span class="report-unit">km</span>
+                </div>
+                <div class="report-comparison">
+                    <span class="comparison-badge positive" id="distanceCompare">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                            <path d="M18 15L12 9L6 15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                        12% more than last period
+                    </span>
+                </div>
+                <div class="report-breakdown" id="distanceBreakdown">
+                    <!-- Populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Alert Summary -->
+        <div class="card report-card">
+            <div class="card-header">
+                <h3 class="card-title">Alert Summary</h3>
+            </div>
+            <div class="card-body">
+                <div class="alert-summary-grid" id="alertSummaryGrid">
+                    <!-- Populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </section>
+</div>

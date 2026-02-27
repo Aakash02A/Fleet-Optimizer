@@ -1,0 +1,29 @@
+<!-- Alerts Module View -->
+<div class="module-content">
+    <!-- Alerts Toolbar -->
+    <section class="alerts-toolbar">
+        <div class="alerts-filter-tabs">
+            <button class="alert-tab active" data-filter="all">All</button>
+            <button class="alert-tab" data-filter="danger">Critical</button>
+            <button class="alert-tab" data-filter="warning">Warning</button>
+            <button class="alert-tab" data-filter="info">Info</button>
+        </div>
+        <button class="clear-alerts-btn" id="clearResolvedAlerts">
+            Clear Resolved
+        </button>
+    </section>
+
+    <!-- Alerts List -->
+    <section class="alerts-center-section">
+        <div class="card alerts-center-card">
+            <div class="card-header">
+                <h3 class="card-title">Alert Center</h3>
+            </div>
+            <div class="card-body">
+                <div class="alerts-center-list" id="alertsCenterList">
+                    <!-- Populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
