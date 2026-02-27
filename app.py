@@ -229,6 +229,26 @@ async def startup():
 async def root():
     return FileResponse("static/index.html")
 
+# Vehicles page
+@app.get("/vehicles")
+async def vehicles_page():
+    return FileResponse("static/vehicles.html")
+
+# Live Map page
+@app.get("/live-map")
+async def live_map_page():
+    return FileResponse("static/live-map.html")
+
+# Analytics page
+@app.get("/analytics")
+async def analytics_page():
+    return FileResponse("static/analytics.html")
+
+# Alerts page
+@app.get("/alerts")
+async def alerts_page():
+    return FileResponse("static/alerts.html")
+
 # Vehicle details page
 @app.get("/vehicle/{vehicle_id}")
 async def vehicle_page(vehicle_id: str):
