@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fleet Optimizer - Vehicle Details</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <!-- Leaflet.js for Maps -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind Config -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif']
+          },
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              200: '#c7d2fe',
+              300: '#a5b4fc',
+              400: '#818cf8',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+              800: '#3730a3',
+              900: '#312e81'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  
+  <style>
+    * {
+      font-family: 'Inter', system-ui, sans-serif;
+    }
+    
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+    
+    /* Gradient backgrounds */
+    .gradient-brand {
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
+    }
+    
+    /* Card hover */
+    .stat-card {
+      transition: all 0.3s ease;
+    }
+    .stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Map styling */
+    #map {
+      height: 320px;
+      border-radius: 1rem;
+      z-index: 1;
+    }
+    
+    .leaflet-control-attribution {
+      font-size: 10px;
+    }
+    
+    /* Sidebar hover */
+    .nav-item {
+      transition: all 0.2s ease;
+    }
+    .nav-item:hover {
+      background: rgba(99, 102, 241, 0.08);
+      transform: translateX(4px);
+    }
+    .nav-item.active {
+      background: rgba(99, 102, 241, 0.1);
+      border-left: 3px solid #6366f1;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-900 min-h-screen">
+  
+  <div class="flex min-h-screen">
+    
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white border-r border-gray-200 flex flex-col fixed h-full z-20 shadow-sm">
+      
+      <!-- Logo -->
+      <div class="p-6 border-b border-gray-100">
+        <a href="/" class="flex items-center space-x-3 hover:opacity-90 transition-opacity">
+          <div class="w-10 h-10 gradient-brand rounded-xl flex items-center justify-center shadow-lg shadow-brand-500/25">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"></path>
+            </svg>
+          </div>
+          <div>
+            <h1 class="text-lg font-bold text-gray-900">Fleet Optimizer</h1>
+            <p class="text-xs text-gray-500">Smart Management</p>
+          </div>
+        </a>
+      </div>
+      
+      <!-- Navigation -->
+      <nav class="flex-1 px-4 py-6 space-y-1">
+        <a href="/" class="nav-item flex items-center px-4 py-3 rounded-lg text-gray-600 hover:text-gray-900">
+          <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
+          </svg>
+          Dashboard
+        </a>
+        <a href="#" class="nav-item active flex items-center px-4 py-3 rounded-lg text-gray-900 font-medium">
+          <svg class="w-5 h-5 mr-3 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"></path>
+          </svg>
+          Vehicles
+        </a>
+        <a href="#" class="nav-item flex items-center px-4 py-3 rounded-lg text-gray-600 hover:text-gray-900">
+          <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+          </svg>
+          Live Map
+        </a>
+        <a href="#" class="nav-item flex items-center px-4 py-3 rounded-lg text-gray-600 hover:text-gray-900">
+          <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+          </svg>
+          Analytics
+        </a>
+        <a href="#" class="nav-item flex items-center px-4 py-3 rounded-lg text-gray-600 hover:text-gray-900">
+          <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+          </svg>
+          Alerts
+        </a>
+      </nav>
+      
+      <!-- User Section -->
+      <div class="p-4 border-t border-gray-100">
+        <div class="flex items-center space-x-3 px-3 py-2 rounded-xl hover:bg-gray-50 transition-colors cursor-pointer">
+          <div class="w-10 h-10 rounded-full bg-gradient-to-br from-brand-400 to-purple-500 flex items-center justify-center text-white font-semibold text-sm shadow-lg">
+            FM
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-medium text-gray-900 truncate">Fleet Manager</p>
+            <p class="text-xs text-gray-500 truncate">admin@fleet.io</p>
+          </div>
+        </div>
+      </div>
+    </aside>
+    
+    <!-- Main Content -->
+    <main class="flex-1 ml-64">
+      
+      <!-- Top Header -->
+      <header class="sticky top-0 z-10 bg-white/80 backdrop-blur-md border-b border-gray-100 px-8 py-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-4">
+            <a href="/" class="p-2 rounded-xl bg-gray-100 hover:bg-gray-200 transition-colors">
+              <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+              </svg>
+            </a>
+            <div>
+              <div class="flex items-center space-x-2">
+                <h2 id="vehicleIdNav" class="text-2xl font-bold text-gray-900">Loading...</h2>
+                <span id="statusBadgeNav" class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">--</span>
+              </div>
+              <p class="text-sm text-gray-500 mt-0.5">Vehicle Details & Telemetry</p>
+            </div>
+          </div>
+          <div class="flex items-center space-x-3">
+            <span id="lastUpdate" class="text-sm text-gray-500">Last update: --</span>
+            <button class="p-2 rounded-xl bg-gray-100 hover:bg-gray-200 transition-colors">
+              <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </header>
+      
+      <div class="p-8 space-y-8">
+        
+        <!-- Vehicle Header Card -->
+        <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+          <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+            <div class="flex items-center space-x-5">
+              <div class="w-16 h-16 gradient-brand rounded-2xl flex items-center justify-center shadow-lg shadow-brand-500/25">
+                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"></path>
+                </svg>
+              </div>
+              <div>
+                <h2 id="vehicleId" class="text-2xl font-bold text-gray-900">Loading...</h2>
+                <p id="driverName" class="text-gray-500 mt-0.5">Driver: Loading...</p>
+              </div>
+            </div>
+            
+            <div class="flex flex-wrap gap-3">
+              <div id="statusBadge" class="px-4 py-2 rounded-xl bg-gray-50 border border-gray-200 text-gray-600 text-sm font-medium">
+                Loading...
+              </div>
+              <div id="vehicleType" class="px-4 py-2 rounded-xl bg-brand-50 border border-brand-200 text-brand-700 text-sm font-medium">
+                Type: --
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Stats Cards Row -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-5">
+          
+          <!-- Current Fuel -->
+          <div class="stat-card bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+            <div class="flex items-center justify-between mb-3">
+              <p class="text-sm font-medium text-gray-500">Current Fuel</p>
+              <div class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
+                <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"></path>
+                </svg>
+              </div>
+            </div>
+            <div class="flex items-end">
+              <p id="currentFuel" class="text-3xl font-bold text-emerald-600">0</p>
+              <span class="text-gray-500 text-lg ml-1 mb-1">%</span>
+            </div>
+            <div class="w-full bg-gray-100 rounded-full h-1.5 mt-4">
+              <div id="fuelBar" class="bg-emerald-500 h-1.5 rounded-full transition-all" style="width: 0%"></div>
+            </div>
+          </div>
+          
+          <!-- Current Speed -->
+          <div class="stat-card bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+            <div class="flex items-center justify-between mb-3">
+              <p class="text-sm font-medium text-gray-500">Current Speed</p>
+              <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
+                <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                </svg>
+              </div>
+            </div>
+            <div class="flex items-end">
+              <p id="currentSpeed" class="text-3xl font-bold text-blue-600">0</p>
+              <span class="text-gray-500 text-lg ml-1 mb-1">km/h</span>
+            </div>
+            <p id="engineStatus" class="text-xs text-gray-500 mt-4 flex items-center">
+              <span class="w-1.5 h-1.5 bg-gray-400 rounded-full mr-1.5"></span>
+              Engine: Off
+            </p>
+          </div>
+          
+          <!-- Baseline Efficiency -->
+          <div class="stat-card bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+            <div class="flex items-center justify-between mb-3">
+              <p class="text-sm font-medium text-gray-500">Efficiency</p>
+              <div class="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center">
+                <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                </svg>
+              </div>
+            </div>
+            <div class="flex items-end">
+              <p id="baselineEfficiency" class="text-3xl font-bold text-amber-600">0</p>
+              <span class="text-gray-500 text-lg ml-1 mb-1">km/L</span>
+            </div>
+            <p id="tankCapacity" class="text-xs text-gray-500 mt-4">Tank: 0L capacity</p>
+          </div>
+          
+          <!-- Alert Count -->
+          <div class="stat-card bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+            <div class="flex items-center justify-between mb-3">
+              <p class="text-sm font-medium text-gray-500">Active Alerts</p>
+              <div class="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center">
+                <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                </svg>
+              </div>
+            </div>
+            <div class="flex items-end">
+              <p id="alertCount" class="text-3xl font-bold text-red-600">0</p>
+            </div>
+            <p class="text-xs text-gray-500 mt-4">Requires attention</p>
+          </div>
+        </div>
+        
+        <!-- Map and Charts Row -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          
+          <!-- Location Map -->
+          <div class="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
+            <div class="px-6 py-5 border-b border-gray-100">
+              <div class="flex items-center justify-between">
+                <div>
+                  <h3 class="text-lg font-semibold text-gray-900">Live Location</h3>
+                  <p class="text-sm text-gray-500 mt-0.5">Last known GPS position</p>
+                </div>
+                <div class="flex items-center space-x-2 text-xs text-gray-500">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                  </svg>
+                  <span id="latitude">--</span>, <span id="longitude">--</span>
+                </div>
+              </div>
+            </div>
+            <div class="p-4">
+              <div id="map"></div>
+            </div>
+          </div>
+          
+          <!-- Fuel Level Over Time -->
+          <div class="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
+            <div class="px-6 py-5 border-b border-gray-100">
+              <div class="flex items-center justify-between">
+                <div>
+                  <h3 class="text-lg font-semibold text-gray-900">Fuel Level History</h3>
+                  <p class="text-sm text-gray-500 mt-0.5">Tracking over time</p>
+                </div>
+              </div>
+            </div>
+            <div class="p-6">
+              <div class="h-64">
+                <canvas id="fuelHistoryChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Efficiency and Speed Charts -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          
+          <!-- Efficiency Over Time -->
+          <div class="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
+            <div class="px-6 py-5 border-b border-gray-100">
+              <div class="flex items-center justify-between">
+                <div>
+                  <h3 class="text-lg font-semibold text-gray-900">Efficiency Trend</h3>
+                  <p class="text-sm text-gray-500 mt-0.5">km/L performance over time</p>
+                </div>
+              </div>
+            </div>
+            <div class="p-6">
+              <div class="h-64">
+                <canvas id="efficiencyChart"></canvas>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Speed Over Time -->
+          <div class="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
+            <div class="px-6 py-5 border-b border-gray-100">
+              <div class="flex items-center justify-between">
+                <div>
+                  <h3 class="text-lg font-semibold text-gray-900">Speed History</h3>
+                  <p class="text-sm text-gray-500 mt-0.5">Velocity tracking</p>
+                </div>
+              </div>
+            </div>
+            <div class="p-6">
+              <div class="h-64">
+                <canvas id="speedChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Alert History Table -->
+        <div class="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
+          <div class="px-6 py-5 border-b border-gray-100">
+            <div class="flex items-center justify-between">
+              <div>
+                <h3 class="text-lg font-semibold text-gray-900">Alert History</h3>
+                <p class="text-sm text-gray-500 mt-0.5">Complete log of detected issues</p>
+              </div>
+              <button class="text-sm text-brand-600 hover:text-brand-700 font-medium transition-colors">Export Log</button>
+            </div>
+          </div>
+          <div id="alertHistory" class="p-6">
+            <div class="flex flex-col items-center py-8">
+              <div class="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center mb-3">
+                <svg class="w-6 h-6 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+              </div>
+              <span class="text-gray-500 text-sm">Loading alert history...</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Footer -->
+        <footer class="pt-6 border-t border-gray-200">
+          <div class="flex items-center justify-between text-sm text-gray-500">
+            <p>&copy; 2026 Fleet Optimizer. All rights reserved.</p>
+            <div class="flex items-center space-x-6">
+              <a href="#" class="hover:text-gray-900 transition-colors">Documentation</a>
+              <a href="#" class="hover:text-gray-900 transition-colors">API</a>
+              <a href="#" class="hover:text-gray-900 transition-colors">Support</a>
+            </div>
+          </div>
+        </footer>
+        
+      </div>
+    </main>
+  </div>
+  
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="fixed bottom-6 right-6 z-50 space-y-3"></div>
+  
+  <!-- Vehicle Detail JavaScript -->
+  <script src="/js/vehicle.js"></script>
+</body>
+</html>

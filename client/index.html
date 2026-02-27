@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FleetCommand - Smart Fleet Management Dashboard</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <!-- Leaflet.js CSS & JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+  
+  <div class="app-container">
+    
+    <!-- ==================== SIDEBAR ==================== -->
+    <aside class="sidebar">
+      
+      <!-- Logo -->
+      <div class="sidebar-logo">
+        <div class="logo-wrapper">
+          <div class="logo-icon">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"></path>
+            </svg>
+          </div>
+          <div class="logo-text">
+            <h1>FleetCommand</h1>
+            <span>Fleet Analytics Platform</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Navigation -->
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <ul class="nav-menu">
+            <li class="nav-item">
+              <a href="/" class="nav-link active">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
+                </svg>
+                Dashboard
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="#" class="nav-link">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1"></path>
+                </svg>
+                Vehicles
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="#" class="nav-link">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                </svg>
+                Analytics
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="#" class="nav-link">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                </svg>
+                Alerts
+                <span id="sidebarAlertCount" class="nav-badge">0</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+        
+        <div class="nav-section">
+          <p class="nav-section-title">Settings</p>
+          <ul class="nav-menu">
+            <li class="nav-item">
+              <a href="#" class="nav-link">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+                Settings
+              </a>
+            </li>
+          </ul>
+        </div>
+      </nav>
+      
+      <!-- User Section -->
+      <div class="sidebar-user">
+        <div class="user-card">
+          <div class="user-avatar">FM</div>
+          <div class="user-info">
+            <p class="user-name">Fleet Manager</p>
+            <p class="user-email">admin@fleetcommand.io</p>
+          </div>
+        </div>
+      </div>
+    </aside>
+    
+    <!-- ==================== MAIN CONTENT ==================== -->
+    <main class="main-content">
+      
+      <!-- Top Navigation Bar -->
+      <header class="top-navbar">
+        <div class="navbar-left">
+          <h1 class="page-title">Dashboard</h1>
+          <p class="page-subtitle">Real-time fleet monitoring and analytics</p>
+        </div>
+        
+        <div class="navbar-right">
+          <div class="search-box">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+            <input type="text" placeholder="Search vehicles...">
+          </div>
+          
+          <button class="navbar-icon-btn" title="Notifications">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+            </svg>
+            <span id="notificationBadge" class="notification-badge">0</span>
+          </button>
+          
+          <div class="navbar-avatar" title="Profile">FM</div>
+        </div>
+      </header>
+      
+      <!-- Content Wrapper -->
+      <div class="content-wrapper">
+        
+        <!-- ==================== KPI CARDS ==================== -->
+        <div class="kpi-grid">
+          
+          <!-- Total Fleet -->
+          <div class="kpi-card animate-fade-in">
+            <div class="kpi-header">
+              <div class="kpi-icon blue">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1"></path>
+                </svg>
+              </div>
+              <div class="kpi-trend up">
+                <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
+                </svg>
+                +2
+              </div>
+            </div>
+            <p id="totalFleet" class="kpi-value">0</p>
+            <p class="kpi-label">Total Fleet</p>
+          </div>
+          
+          <!-- Average Fuel -->
+          <div class="kpi-card animate-fade-in">
+            <div class="kpi-header">
+              <div class="kpi-icon green">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"></path>
+                </svg>
+              </div>
+              <div class="kpi-trend up">
+                <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
+                </svg>
+                5%
+              </div>
+            </div>
+            <p id="avgFuel" class="kpi-value">0<span>%</span></p>
+            <p class="kpi-label">Average Fuel %</p>
+          </div>
+          
+          <!-- Active Alerts -->
+          <div class="kpi-card animate-fade-in">
+            <div class="kpi-header">
+              <div class="kpi-icon red">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                </svg>
+              </div>
+            </div>
+            <p id="activeAlerts" class="kpi-value">0</p>
+            <p class="kpi-label">Active Alerts</p>
+          </div>
+          
+          <!-- System Status -->
+          <div class="kpi-card animate-fade-in">
+            <div class="kpi-header">
+              <div class="kpi-icon amber">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+              </div>
+              <div class="live-indicator">
+                <span class="live-dot"></span>
+                <span class="live-text">Live</span>
+              </div>
+            </div>
+            <p id="systemStatus" class="kpi-value">Online</p>
+            <p class="kpi-label">System Status</p>
+          </div>
+        </div>
+        
+        <!-- ==================== DASHBOARD GRID ==================== -->
+        <div class="dashboard-grid">
+          
+          <!-- Left Column -->
+          <div class="dashboard-left">
+            
+            <!-- Fuel Trend Chart -->
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <h3 class="card-title">Fuel Trend Analysis</h3>
+                  <p class="card-subtitle">Last 7 days fuel consumption</p>
+                </div>
+                <a href="#" class="card-action">View Report</a>
+              </div>
+              <div class="card-body">
+                <div class="chart-container">
+                  <canvas id="fuelTrendChart"></canvas>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Vehicle Status Table -->
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <h3 class="card-title">Vehicle Status</h3>
+                  <p class="card-subtitle">Real-time fleet overview</p>
+                </div>
+                <a href="#" class="card-action">View All</a>
+              </div>
+              <div class="card-body" style="padding: 0;">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Vehicle ID</th>
+                      <th>Fuel %</th>
+                      <th>Status</th>
+                      <th>Last Updated</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="vehicleTableBody">
+                    <tr>
+                      <td colspan="5">
+                        <div class="empty-state">
+                          <div class="empty-icon">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                            </svg>
+                          </div>
+                          <p class="empty-title">Loading vehicles...</p>
+                          <p class="empty-description">Please wait while we fetch fleet data</p>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Right Column -->
+          <div class="dashboard-right">
+            
+            <!-- Live Vehicle Map -->
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <h3 class="card-title">Live Vehicle Map</h3>
+                  <p class="card-subtitle">Real-time locations</p>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="map-container">
+                  <div id="vehicleMap"></div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Alerts Panel -->
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <h3 class="card-title">Recent Alerts</h3>
+                  <p class="card-subtitle">System notifications</p>
+                </div>
+                <div class="live-indicator">
+                  <span class="live-dot"></span>
+                  <span class="live-text">Live</span>
+                </div>
+              </div>
+              <div id="alertsList" class="alerts-list">
+                <div class="empty-state">
+                  <div class="empty-icon">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                  </div>
+                  <p class="empty-title">No Active Alerts</p>
+                  <p class="empty-description">All systems operating normally</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  
+  <!-- Toast Container -->
+  <div id="toastContainer" class="toast-container"></div>
+  
+  <!-- Dashboard JavaScript -->
+  <script src="/js/dashboard.js"></script>
+</body>
+</html>
