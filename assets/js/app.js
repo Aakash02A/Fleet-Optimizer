@@ -7,8 +7,8 @@ import { CONFIG, MODULE_TITLES } from './config.js';
 import { State, initializeVehicleData } from './state.js';
 import { DOM, cacheDOMElements } from './dom.js';
 import { showToast } from './utils.js';
-import { updateDashboard } from './modules/dashboard.js';
-import { renderFleetTable, initFleetModule } from './modules/fleet.js';
+import { updateDashboard, initDashboardMap } from './modules/dashboard.js';
+import { renderFleetTable, initFleetModule, initFleetMap } from './modules/fleet.js';
 import { renderReports } from './modules/reports.js';
 import { updateAlertBadge, renderAlertsCenter } from './modules/alerts.js';
 import { initializeSettings, saveSettings, resetSettings, setRestartUpdateLoopCallback } from './modules/settings.js';
@@ -43,8 +43,11 @@ function switchModule(module) {
         (module === 'dashboard') ? 'flex' : 'none';
     
     // Module-specific updates
-    if (module === 'fleet') {
+    if (module === 'dashboard') {
+        setTimeout(() => initDashboardMap(), 100);
+    } else if (module === 'fleet') {
         renderFleetTable();
+        setTimeout(() => initFleetMap(), 100);
     } else if (module === 'reports') {
         renderReports();
     } else if (module === 'alerts') {
@@ -212,6 +215,12 @@ async function init() {
     
     // Initialize module-specific features
     initFleetModule();
+    
+    // Initialize Leaflet maps (with a slight delay to ensure containers are ready)
+    setTimeout(() => {
+        initDashboardMap();
+        initFleetMap();
+    }, 200);
     
     // Initial render
     updateDashboard();

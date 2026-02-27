@@ -8,6 +8,113 @@ import { State, getAllVehicles } from '../state.js';
 import { DOM } from '../dom.js';
 import { updateDashboardAlerts } from './alerts.js';
 
+// Leaflet map instance and marker
+let dashboardMap = null;
+let vehicleMarker = null;
+
+/**
+ * Initialize the Leaflet map for dashboard
+ */
+function initDashboardMap() {
+    const mapElement = document.getElementById('dashboardMap');
+    if (!mapElement || dashboardMap) return;
+    
+    // Initialize map centered on Chennai, India (default location)
+    dashboardMap = L.map('dashboardMap', {
+        zoomControl: true,
+        attributionControl: true
+    }).setView([13.0827, 80.2707], 13);
+    
+    // Add OpenStreetMap tile layer
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        maxZoom: 19
+    }).addTo(dashboardMap);
+    
+    // Create custom vehicle icon
+    const vehicleIcon = L.divIcon({
+        className: 'vehicle-map-marker',
+        html: `
+            <div class="marker-wrapper">
+                <div class="marker-pulse"></div>
+                <div class="marker-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="10" fill="#10B981" stroke="#fff" stroke-width="2"/>
+                        <path d="M8 12L11 15L16 9" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+            </div>
+        `,
+        iconSize: [40, 40],
+        iconAnchor: [20, 20]
+    });
+    
+    // Add initial marker
+    const vehicle = State.vehicles[State.selectedVehicle];
+    if (vehicle) {
+        vehicleMarker = L.marker([vehicle.lat, vehicle.lon], { icon: vehicleIcon })
+            .addTo(dashboardMap)
+            .bindPopup(`<strong>${vehicle.id}</strong><br>Fuel: ${vehicle.fuel.toFixed(1)}%<br>Speed: ${vehicle.speed.toFixed(0)} km/h`);
+    }
+    
+    // Invalidate size after a short delay to ensure proper rendering
+    setTimeout(() => {
+        dashboardMap.invalidateSize();
+    }, 100);
+}
+
+/**
+ * Update the vehicle marker position on the map
+ */
+function updateMapMarker(vehicle) {
+    if (!dashboardMap) {
+        initDashboardMap();
+        return;
+    }
+    
+    const newLatLng = [vehicle.lat, vehicle.lon];
+    
+    // Update marker icon based on status
+    const statusColor = vehicle.status === 'normal' ? '#10B981' : 
+                       vehicle.status === 'warning' ? '#F59E0B' : '#EF4444';
+    
+    const vehicleIcon = L.divIcon({
+        className: 'vehicle-map-marker',
+        html: `
+            <div class="marker-wrapper">
+                <div class="marker-pulse" style="background: ${statusColor}40;"></div>
+                <div class="marker-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="10" fill="${statusColor}" stroke="#fff" stroke-width="2"/>
+                        <path d="M7 13L10 10L14 14L17 11" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+            </div>
+        `,
+        iconSize: [40, 40],
+        iconAnchor: [20, 20]
+    });
+    
+    if (vehicleMarker) {
+        vehicleMarker.setLatLng(newLatLng);
+        vehicleMarker.setIcon(vehicleIcon);
+        vehicleMarker.setPopupContent(`
+            <strong>${vehicle.id}</strong><br>
+            <span class="popup-label">Status:</span> ${vehicle.status}<br>
+            <span class="popup-label">Fuel:</span> ${vehicle.fuel.toFixed(1)}%<br>
+            <span class="popup-label">Speed:</span> ${vehicle.speed.toFixed(0)} km/h<br>
+            <span class="popup-label">Heading:</span> ${vehicle.heading}
+        `);
+    } else {
+        vehicleMarker = L.marker(newLatLng, { icon: vehicleIcon })
+            .addTo(dashboardMap)
+            .bindPopup(`<strong>${vehicle.id}</strong><br>Fuel: ${vehicle.fuel.toFixed(1)}%`);
+    }
+    
+    // Smoothly pan to new location
+    dashboardMap.panTo(newLatLng, { animate: true, duration: 0.5 });
+}
+
 /**
  * Update fuel chart with current data
  */
@@ -197,12 +304,8 @@ function updateDashboard() {
     DOM.gpsStatus.textContent = vehicle.gpsStatus;
     DOM.statusUptime.textContent = 'System uptime: ' + vehicle.uptime;
     
-    // Update Map Marker
-    const mapContainer = DOM.mapContainer;
-    const markerX = ((vehicle.lon - 80.22) / 0.1) * mapContainer.offsetWidth;
-    const markerY = ((13.13 - vehicle.lat) / 0.1) * mapContainer.offsetHeight;
-    DOM.mapMarker.style.left = Math.min(90, Math.max(10, (markerX / mapContainer.offsetWidth) * 100)) + '%';
-    DOM.mapMarker.style.top = Math.min(90, Math.max(10, (markerY / mapContainer.offsetHeight) * 100)) + '%';
+    // Update Leaflet Map Marker
+    updateMapMarker(vehicle);
     
     // Update Coordinates
     DOM.latValue.textContent = vehicle.lat.toFixed(6);
@@ -226,4 +329,4 @@ function updateDashboard() {
     updateRecentTrips();
 }
 
-export { updateDashboard, updateChart };
+export { updateDashboard, updateChart, initDashboardMap };

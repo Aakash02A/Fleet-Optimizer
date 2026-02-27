@@ -15,6 +15,69 @@ const locations = ['Downtown', 'Warehouse A', 'Route 45', 'Central Hub'];
 let currentFilter = 'all';
 let currentSort = { field: 'id', order: 'asc' };
 
+// Leaflet map instance and markers for fleet view
+let fleetMap = null;
+let fleetMarkers = [];
+
+/**
+ * Initialize the Leaflet map for fleet view
+ */
+function initFleetMap() {
+    const mapElement = document.getElementById('fleetLeafletMap');
+    if (!mapElement || fleetMap) return;
+    
+    // Initialize map centered on Chennai, India
+    fleetMap = L.map('fleetLeafletMap', {
+        zoomControl: true,
+        attributionControl: true
+    }).setView([13.0827, 80.2707], 12);
+    
+    // Add OpenStreetMap tile layer
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        maxZoom: 19
+    }).addTo(fleetMap);
+    
+    // Invalidate size after a short delay
+    setTimeout(() => {
+        fleetMap.invalidateSize();
+    }, 100);
+    
+    // Initial render of markers
+    const vehicles = getAllVehicles();
+    renderFleetMarkers(vehicles);
+}
+
+/**
+ * Get vehicle icon based on status
+ */
+function getVehicleIcon(vehicle, index) {
+    const statusColors = {
+        'normal': '#10B981',
+        'warning': '#F59E0B',
+        'danger': '#EF4444',
+        'critical': '#EF4444',
+        'idle': '#6B7280'
+    };
+    
+    const color = statusColors[vehicle.status] || statusColors['normal'];
+    
+    return L.divIcon({
+        className: 'fleet-vehicle-marker',
+        html: `
+            <div class="fleet-marker-wrapper" style="--marker-color: ${color};">
+                <div class="fleet-marker-body" style="background: ${color};">
+                    <span class="fleet-marker-number">${index + 1}</span>
+                </div>
+                <div class="fleet-marker-arrow" style="border-top-color: ${color};"></div>
+            </div>
+        `,
+        iconSize: [30, 42],
+        iconAnchor: [15, 42],
+        popupAnchor: [0, -42]
+    });
+}
+
 /**
  * Calculate estimated range based on fuel and efficiency
  */
@@ -177,29 +240,53 @@ function renderFleetTable(searchFilter = '', statusFilter = 'all') {
 }
 
 /**
- * Render fleet markers on the map
+ * Render fleet markers on the Leaflet map
  */
 function renderFleetMarkers(vehicles) {
-    const markersContainer = document.getElementById('fleetMarkers');
-    if (!markersContainer) return;
+    if (!fleetMap) {
+        initFleetMap();
+        return;
+    }
     
-    markersContainer.innerHTML = vehicles.map((vehicle, idx) => {
-        const statusClass = vehicle.status === 'normal' ? '' : 
-                           vehicle.status === 'warning' ? 'warning' : 'danger';
-        // Position markers in a grid pattern for visualization
-        const row = Math.floor(idx / 2);
-        const col = idx % 2;
-        const top = 20 + (row * 35);
-        const left = 25 + (col * 50);
+    // Clear existing markers
+    fleetMarkers.forEach(marker => fleetMap.removeLayer(marker));
+    fleetMarkers = [];
+    
+    // Add markers for each vehicle
+    vehicles.forEach((vehicle, idx) => {
+        const icon = getVehicleIcon(vehicle, idx);
+        const marker = L.marker([vehicle.lat, vehicle.lon], { icon: icon })
+            .addTo(fleetMap)
+            .bindPopup(`
+                <div class="fleet-popup">
+                    <strong>${vehicle.name || vehicle.id}</strong>
+                    <div class="popup-row">
+                        <span class="popup-label">Status:</span>
+                        <span class="popup-value status-${vehicle.status}">${vehicle.status}</span>
+                    </div>
+                    <div class="popup-row">
+                        <span class="popup-label">Fuel:</span>
+                        <span class="popup-value">${vehicle.fuel.toFixed(1)}%</span>
+                    </div>
+                    <div class="popup-row">
+                        <span class="popup-label">Efficiency:</span>
+                        <span class="popup-value">${vehicle.efficiency.toFixed(1)} km/L</span>
+                    </div>
+                    <div class="popup-row">
+                        <span class="popup-label">Speed:</span>
+                        <span class="popup-value">${vehicle.speed?.toFixed(0) || 0} km/h</span>
+                    </div>
+                </div>
+            `);
         
-        return `
-            <div class="fleet-marker ${statusClass}" 
-                 style="top: ${top}%; left: ${left}%;"
-                 title="${vehicle.name} - ${vehicle.fuel.toFixed(1)}% fuel">
-                ${idx + 1}
-            </div>
-        `;
-    }).join('');
+        fleetMarkers.push(marker);
+    });
+    
+    // Fit map bounds to show all markers
+    if (fleetMarkers.length > 0) {
+        const group = L.featureGroup(fleetMarkers);
+        fleetMap.fitBounds(group.getBounds().pad(0.1));
+    }
 }
 
 /**
@@ -257,6 +344,38 @@ function initFleetModule() {
         exportBtn.addEventListener('click', exportFleetData);
     }
     
+    // Refresh map button
+    const refreshMapBtn = document.getElementById('btnRefreshMap');
+    if (refreshMapBtn) {
+        refreshMapBtn.addEventListener('click', () => {
+            const vehicles = getAllVehicles();
+            renderFleetMarkers(vehicles);
+        });
+    }
+    
+    // Fullscreen map button
+    const fullscreenMapBtn = document.getElementById('btnFullscreenMap');
+    if (fullscreenMapBtn) {
+        fullscreenMapBtn.addEventListener('click', () => {
+            const mapContainer = document.getElementById('fleetMapContainer');
+            if (mapContainer) {
+                if (!document.fullscreenElement) {
+                    mapContainer.requestFullscreen?.() || 
+                    mapContainer.webkitRequestFullscreen?.() ||
+                    mapContainer.msRequestFullscreen?.();
+                } else {
+                    document.exitFullscreen?.() ||
+                    document.webkitExitFullscreen?.() ||
+                    document.msExitFullscreen?.();
+                }
+                // Invalidate map size after fullscreen toggle
+                setTimeout(() => {
+                    if (fleetMap) fleetMap.invalidateSize();
+                }, 100);
+            }
+        });
+    }
+    
     // Add vehicle button
     const addBtn = document.getElementById('btnAddVehicle');
     if (addBtn) {
@@ -293,4 +412,4 @@ function exportFleetData() {
     window.URL.revokeObjectURL(url);
 }
 
-export { renderFleetTable, initFleetModule, exportFleetData };
+export { renderFleetTable, initFleetModule, initFleetMap, exportFleetData };

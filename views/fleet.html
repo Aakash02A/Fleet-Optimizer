@@ -215,14 +215,8 @@
             </div>
             <div class="card-body">
                 <div class="fleet-map-container" id="fleetMapContainer">
-                    <div class="fleet-map-placeholder">
-                        <div class="map-grid"></div>
-                        <!-- Vehicle markers will be added dynamically -->
-                        <div class="fleet-markers" id="fleetMarkers"></div>
-                        <div class="map-overlay">
-                            <span class="map-notice">Fleet map - showing all vehicle locations</span>
-                        </div>
-                    </div>
+                    <!-- Leaflet Fleet Map -->
+                    <div id="fleetLeafletMap" style="width: 100%; height: 100%; min-height: 400px; border-radius: 8px; z-index: 1;"></div>
                 </div>
                 <div class="fleet-map-legend">
                     <div class="legend-item">

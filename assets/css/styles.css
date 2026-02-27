@@ -890,6 +890,185 @@ input, select {
     color: var(--gray-800);
 }
 
+/* ================== */
+/* Leaflet Map Styles */
+/* ================== */
+
+/* Dashboard Vehicle Marker */
+.vehicle-map-marker {
+    background: transparent !important;
+    border: none !important;
+}
+
+.vehicle-map-marker .marker-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.vehicle-map-marker .marker-pulse {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    background: rgba(16, 185, 129, 0.3);
+    border-radius: 50%;
+    animation: leaflet-pulse 2s infinite;
+}
+
+@keyframes leaflet-pulse {
+    0% { transform: scale(0.5); opacity: 1; }
+    100% { transform: scale(1.5); opacity: 0; }
+}
+
+.vehicle-map-marker .marker-icon {
+    position: relative;
+    z-index: 2;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+/* Fleet Vehicle Marker */
+.fleet-vehicle-marker {
+    background: transparent !important;
+    border: none !important;
+}
+
+.fleet-marker-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.fleet-marker-body {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    border: 2px solid white;
+    transition: transform 0.2s ease;
+}
+
+.fleet-marker-body:hover {
+    transform: scale(1.1);
+}
+
+.fleet-marker-number {
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+    font-family: var(--font-mono);
+}
+
+.fleet-marker-arrow {
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 8px solid #10B981;
+    margin-top: -2px;
+}
+
+/* Leaflet Popup Styles */
+.leaflet-popup-content-wrapper {
+    border-radius: 12px !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+    padding: 0 !important;
+}
+
+.leaflet-popup-content {
+    margin: 0 !important;
+    padding: 12px 16px !important;
+    font-family: var(--font-main) !important;
+}
+
+.leaflet-popup-content strong {
+    font-size: 14px;
+    color: var(--gray-800);
+    display: block;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.fleet-popup .popup-row,
+.popup-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 0;
+    font-size: 12px;
+}
+
+.popup-label {
+    color: var(--gray-500);
+}
+
+.popup-value {
+    font-weight: 600;
+    color: var(--gray-800);
+}
+
+.popup-value.status-normal { color: var(--success-500); }
+.popup-value.status-warning { color: var(--warning-500); }
+.popup-value.status-danger, 
+.popup-value.status-critical { color: var(--danger-500); }
+.popup-value.status-idle { color: var(--gray-500); }
+
+.leaflet-popup-tip-container {
+    display: none;
+}
+
+/* Map Container Adjustments for Leaflet */
+.map-container,
+.fleet-map-container {
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+#dashboardMap,
+#fleetLeafletMap {
+    z-index: 1;
+}
+
+/* Leaflet Control Styling */
+.leaflet-control-zoom {
+    border: none !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+}
+
+.leaflet-control-zoom a {
+    background: white !important;
+    color: var(--gray-700) !important;
+    border: none !important;
+    width: 32px !important;
+    height: 32px !important;
+    line-height: 32px !important;
+    font-size: 16px !important;
+}
+
+.leaflet-control-zoom a:hover {
+    background: var(--gray-100) !important;
+    color: var(--primary-500) !important;
+}
+
+.leaflet-control-zoom-in {
+    border-radius: 8px 8px 0 0 !important;
+}
+
+.leaflet-control-zoom-out {
+    border-radius: 0 0 8px 8px !important;
+}
+
+.leaflet-control-attribution {
+    font-size: 10px !important;
+    background: rgba(255, 255, 255, 0.8) !important;
+    padding: 2px 6px !important;
+    border-radius: 4px 0 0 0 !important;
+}
+
 /* Alerts Card */
 .alerts-card .card-body {
     padding: var(--space-md);
