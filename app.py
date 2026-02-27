@@ -4,80 +4,22 @@ Fleet Optimizer Backend - FastAPI + SQLite3
 from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional, List
 from datetime import datetime, timedelta
 import sqlite3
 import random
 import os
-
-app = FastAPI(title="Fleet Optimizer API")
+from contextlib import asynccontextmanager
 
 # Database file path
 DB_PATH = "fleet_optimizer.db"
 
-# ----- Pydantic Models -----
-class Vehicle(BaseModel):
-    id: int
-    vehicle_id: str
-    driver_name: str
-    vehicle_type: str
-    status: str
-    current_fuel: float
-    current_speed: float
-    latitude: float
-    longitude: float
-    engine_on: bool
-    baseline_efficiency: float
-    tank_capacity: int
-    created_at: str
-    updated_at: str
-
-class Telemetry(BaseModel):
-    id: int
-    vehicle_id: int
-    fuel_level: float
-    speed: float
-    efficiency: float
-    latitude: float
-    longitude: float
-    timestamp: str
-
-class Alert(BaseModel):
-    id: int
-    vehicle_id: int
-    alert_type: str
-    severity: str
-    message: str
-    resolved: bool
-    created_at: str
-
-class VehicleUpdate(BaseModel):
-    driver_name: Optional[str] = None
-    status: Optional[str] = None
-    current_fuel: Optional[float] = None
-    current_speed: Optional[float] = None
-    latitude: Optional[float] = None
-    longitude: Optional[float] = None
-    engine_on: Optional[bool] = None
-
-class VehicleCreate(BaseModel):
-    vehicle_id: str
-    driver_name: str
-    vehicle_type: str
-    tank_capacity: int = 60
-    baseline_efficiency: float = 12.5
-
-# ----- Database Functions -----
-def get_db():
-    """Get database connection"""
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    return conn
-
+# Initialize database on startup
 def init_db():
     """Initialize database tables"""
-    conn = get_db()
+    conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     
     # Create vehicles table
@@ -134,7 +76,7 @@ def init_db():
 
 def seed_data():
     """Seed sample data if database is empty"""
-    conn = get_db()
+    conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     
     # Check if vehicles exist
@@ -216,13 +158,87 @@ def seed_data():
     conn.close()
     print("Database seeded with sample data!")
 
-# ----- API Endpoints -----
-
-@app.on_event("startup")
-async def startup():
-    """Initialize database on startup"""
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
     init_db()
     seed_data()
+    yield
+    # Shutdown
+    pass
+
+app = FastAPI(title="Fleet Optimizer API", lifespan=lifespan)
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# ----- Pydantic Models -----
+class Vehicle(BaseModel):
+    id: int
+    vehicle_id: str
+    driver_name: str
+    vehicle_type: str
+    status: str
+    current_fuel: float
+    current_speed: float
+    latitude: float
+    longitude: float
+    engine_on: bool
+    baseline_efficiency: float
+    tank_capacity: int
+    created_at: str
+    updated_at: str
+
+class Telemetry(BaseModel):
+    id: int
+    vehicle_id: int
+    fuel_level: float
+    speed: float
+    efficiency: float
+    latitude: float
+    longitude: float
+    timestamp: str
+
+class Alert(BaseModel):
+    id: int
+    vehicle_id: int
+    alert_type: str
+    severity: str
+    message: str
+    resolved: bool
+    created_at: str
+
+class VehicleUpdate(BaseModel):
+    driver_name: Optional[str] = None
+    status: Optional[str] = None
+    current_fuel: Optional[float] = None
+    current_speed: Optional[float] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+    engine_on: Optional[bool] = None
+
+class VehicleCreate(BaseModel):
+    vehicle_id: str
+    driver_name: str
+    vehicle_type: str
+    tank_capacity: int = 60
+    baseline_efficiency: float = 12.5
+
+# ----- Database Functions -----
+def get_db():
+    """Get database connection"""
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+
+# ----- API Endpoints -----
 
 # Root - serve index.html
 @app.get("/")
