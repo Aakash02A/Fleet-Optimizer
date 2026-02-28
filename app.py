@@ -13,6 +13,7 @@ from datetime import datetime, timedelta
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
 import re
+from iot_handler import handle_iot_telemetry, is_real_iot_vehicle, IoTTelemetryHandler
 
 # ============================================
 # DATABASE CONFIGURATION
@@ -939,6 +940,11 @@ class SimulationEngine:
         
         for row in cursor.fetchall():
             vehicle = dict_from_row(row)
+            
+            # Skip real IoT vehicle - it gets data from ESP32
+            if is_real_iot_vehicle(vehicle['id']):
+                continue
+            
             prev_fuel = vehicle['fuel']
             
             # Natural consumption (0.1 - 0.5% per update)
@@ -1154,6 +1160,11 @@ class FleetPulseHandler(SimpleHTTPRequestHandler):
             elif path == '/api/simulation/status':
                 result = {'running': simulation.running}
             
+            # IoT status endpoint
+            elif path == '/api/iot/status':
+                vehicle_id = query.get('vehicle_id', ['TN01AB1234'])[0]
+                result = IoTTelemetryHandler.get_iot_status(vehicle_id)
+            
             else:
                 self.send_error_response(404, 'Endpoint not found')
                 return
@@ -1172,6 +1183,12 @@ class FleetPulseHandler(SimpleHTTPRequestHandler):
             elif re.match(r'/api/vehicles/[^/]+/telemetry$', path):
                 vehicle_id = path.split('/')[-2]
                 result = VehicleAPI.update_telemetry(vehicle_id, data)
+            
+            # IoT Telemetry endpoint (ESP32)
+            elif path == '/api/iot/telemetry':
+                result, status_code = handle_iot_telemetry(data)
+                self.send_json_response(result, status_code)
+                return
             
             # Alerts
             elif path == '/api/alerts':
@@ -1331,6 +1348,9 @@ def run_server(port=8000):
     print("  GET  /api/simulation/start  - Start simulation")
     print("  GET  /api/simulation/stop   - Stop simulation")
     print("  GET  /api/simulation/status - Simulation status")
+    print("")
+    print("  POST /api/iot/telemetry     - Receive ESP32 data")
+    print("  GET  /api/iot/status        - IoT connection status")
     print("\nPress Ctrl+C to stop the server\n")
     
     try:
