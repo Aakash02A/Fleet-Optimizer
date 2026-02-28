@@ -14,6 +14,8 @@ import { updateAlertBadge, renderAlertsCenter } from './modules/alerts.js';
 import { initializeSettings, saveSettings, resetSettings, setRestartUpdateLoopCallback } from './modules/settings.js';
 import { simulateVehicleData } from './simulation.js';
 import { loadAllViews } from './viewLoader.js';
+import { API, APIConfig } from './apiService.js';
+import { initDataSync, syncVehicles, getSyncStatus } from './dataSync.js';
 
 /**
  * Switch between modules
@@ -59,8 +61,13 @@ function switchModule(module) {
  * Start the update loop
  */
 function startUpdateLoop() {
-    State.updateIntervalId = setInterval(() => {
-        simulateVehicleData();
+    State.updateIntervalId = setInterval(async () => {
+        // Use backend sync if available, otherwise local simulation
+        if (APIConfig.useBackend && APIConfig.backendAvailable) {
+            await syncVehicles();
+        } else {
+            simulateVehicleData();
+        }
         
         if (State.currentModule === 'dashboard') {
             updateDashboard();
@@ -85,6 +92,45 @@ function restartUpdateLoop() {
 }
 
 /**
+ * Populate vehicle selector dropdown dynamically
+ */
+function populateVehicleSelector() {
+    const vehicles = Object.values(State.vehicles);
+    if (vehicles.length === 0) return;
+    
+    DOM.vehicleSelect.innerHTML = vehicles.map(v => 
+        `<option value="${v.id}">${v.id} - ${v.name}</option>`
+    ).join('');
+    
+    // Ensure selected vehicle is valid
+    if (!State.vehicles[State.selectedVehicle] && vehicles.length > 0) {
+        State.selectedVehicle = vehicles[0].id;
+    }
+    DOM.vehicleSelect.value = State.selectedVehicle;
+}
+
+/**
+ * Update connection status indicator
+ */
+function updateConnectionStatus(connected) {
+    const statusEl = document.getElementById('connectionStatus');
+    const statusDot = document.getElementById('statusDot');
+    const statusText = document.getElementById('statusText');
+    
+    if (!statusEl) return;
+    
+    if (connected) {
+        statusEl.className = 'connection-status connected';
+        statusText.textContent = 'Backend';
+        statusEl.title = 'Connected to Python backend server';
+    } else {
+        statusEl.className = 'connection-status disconnected';
+        statusText.textContent = 'Local';
+        statusEl.title = 'Using local simulation (backend unavailable)';
+    }
+}
+
+/**
  * Setup all event listeners
  */
 function setupEventListeners() {
@@ -103,9 +149,16 @@ function setupEventListeners() {
     });
     
     // Refresh button
-    DOM.refreshBtn.addEventListener('click', () => {
+    DOM.refreshBtn.addEventListener('click', async () => {
         DOM.refreshBtn.classList.add('spinning');
-        simulateVehicleData();
+        
+        // Use backend sync if available, otherwise local simulation
+        if (APIConfig.useBackend && APIConfig.backendAvailable) {
+            await syncVehicles();
+        } else {
+            simulateVehicleData();
+        }
+        
         updateDashboard();
         setTimeout(() => DOM.refreshBtn.classList.remove('spinning'), 1000);
     });
@@ -208,7 +261,27 @@ async function init() {
     
     // Cache DOM elements after views are loaded
     cacheDOMElements();
+    
+    // Initialize local vehicle data first (as fallback)
     initializeVehicleData();
+    
+    // Try to connect to backend and sync data
+    const backendConnected = await initDataSync();
+    
+    if (backendConnected) {
+        showToast('Connected to backend server', 'success');
+        console.log('FleetPulse: Backend connected');
+    } else {
+        showToast('Using local simulation mode', 'info');
+        console.log('FleetPulse: Local simulation mode');
+    }
+    
+    // Update connection status indicator
+    updateConnectionStatus(backendConnected);
+    
+    // Populate vehicle selector with current vehicles
+    populateVehicleSelector();
+    
     initializeSettings();
     setRestartUpdateLoopCallback(restartUpdateLoop);
     setupEventListeners();
@@ -225,8 +298,12 @@ async function init() {
     // Initial render
     updateDashboard();
     
-    // Start simulation loop
+    // Start update loop (uses backend or local simulation based on availability)
     startUpdateLoop();
+    
+    // Log sync status
+    const status = getSyncStatus();
+    console.log('FleetPulse: Sync status', status);
     
     State.isInitialized = true;
     console.log('FleetPulse: Initialization complete');

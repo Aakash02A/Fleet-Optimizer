@@ -7,8 +7,10 @@ const API_BASE = 'http://localhost:8000/api';
 
 // Configuration
 const APIConfig = {
-    useBackend: false,  // Set to true to use Python backend
-    timeout: 10000
+    useBackend: true,  // Enable backend by default
+    timeout: 10000,
+    autoDetect: true,  // Auto-detect backend availability
+    backendAvailable: false
 };
 
 /**
@@ -365,7 +367,7 @@ const API = {
     },
     
     /**
-     * Check if backend is available
+     * Check if backend is available and auto-configure
      */
     async checkBackend() {
         try {
@@ -373,10 +375,28 @@ const API = {
                 method: 'GET',
                 signal: AbortSignal.timeout(3000)
             });
+            APIConfig.backendAvailable = response.ok;
+            if (APIConfig.autoDetect) {
+                APIConfig.useBackend = response.ok;
+            }
+            console.log(`Backend ${response.ok ? 'connected' : 'unavailable'}`);
             return response.ok;
         } catch {
+            APIConfig.backendAvailable = false;
+            if (APIConfig.autoDetect) {
+                APIConfig.useBackend = false;
+            }
+            console.log('Backend unavailable, using local simulation');
             return false;
         }
+    },
+    
+    /**
+     * Initialize API - check backend and start
+     */
+    async init() {
+        await this.checkBackend();
+        return APIConfig.backendAvailable;
     }
 };
 

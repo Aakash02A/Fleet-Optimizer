@@ -13,14 +13,18 @@ const State = {
     alertHistory: [],
     chartData: [],
     isInitialized: false,
-    updateIntervalId: null
+    updateIntervalId: null,
+    backendConnected: false
 };
 
 /**
  * Calculate estimated range based on current fuel and efficiency
  */
 function calculateRange(vehicle) {
-    const fuelLiters = (vehicle.fuel / 100) * VEHICLE_PROFILES[vehicle.id].capacity;
+    // Get capacity from profile or vehicle data or default
+    const profile = VEHICLE_PROFILES[vehicle.id];
+    const capacity = profile?.capacity || vehicle.capacity || 100;
+    const fuelLiters = (vehicle.fuel / 100) * capacity;
     return Math.round(fuelLiters * vehicle.efficiency);
 }
 

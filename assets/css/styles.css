@@ -330,6 +330,45 @@ input, select {
     gap: var(--space-lg);
 }
 
+/* Connection Status Indicator */
+.connection-status {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-xs) var(--space-sm);
+    background: var(--gray-100);
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    cursor: default;
+}
+
+.connection-status .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--gray-400);
+    animation: pulse-dot 2s infinite;
+}
+
+.connection-status.connected .status-dot {
+    background: var(--success-500);
+}
+
+.connection-status.disconnected .status-dot {
+    background: var(--warning-500);
+    animation: none;
+}
+
+.connection-status .status-text {
+    color: var(--gray-600);
+    font-weight: 500;
+}
+
+@keyframes pulse-dot {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
 .vehicle-selector {
     display: flex;
     align-items: center;

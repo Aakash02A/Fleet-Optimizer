@@ -1090,7 +1090,8 @@ class FleetPulseHandler(SimpleHTTPRequestHandler):
         try:
             # Vehicles
             if path == '/api/vehicles':
-                result = VehicleAPI.get_all()
+                vehicles = VehicleAPI.get_all()
+                result = {'vehicles': vehicles, 'count': len(vehicles)}
             elif re.match(r'/api/vehicles/[^/]+$', path):
                 vehicle_id = path.split('/')[-1]
                 result = VehicleAPI.get_by_id(vehicle_id)
@@ -1104,7 +1105,8 @@ class FleetPulseHandler(SimpleHTTPRequestHandler):
                 severity = query.get('severity', [None])[0]
                 if resolved:
                     resolved = resolved.lower() == 'true'
-                result = AlertAPI.get_all(resolved, severity)
+                alerts = AlertAPI.get_all(resolved, severity)
+                result = {'alerts': alerts, 'count': len(alerts)}
             elif path == '/api/alerts/counts':
                 result = AlertAPI.get_counts()
             
@@ -1119,23 +1121,27 @@ class FleetPulseHandler(SimpleHTTPRequestHandler):
             
             # Settings
             elif path == '/api/settings':
-                result = SettingsAPI.get_all()
+                settings = SettingsAPI.get_all()
+                result = {'settings': settings}
             
             # Trips
             elif path == '/api/trips':
                 vehicle_id = query.get('vehicle_id', [None])[0]
                 limit = int(query.get('limit', [50])[0])
-                result = TripsAPI.get_all(vehicle_id, limit)
+                trips = TripsAPI.get_all(vehicle_id, limit)
+                result = {'trips': trips, 'count': len(trips)}
             
             # Refuel logs
             elif path == '/api/refuels':
                 vehicle_id = query.get('vehicle_id', [None])[0]
                 limit = int(query.get('limit', [50])[0])
-                result = RefuelAPI.get_all(vehicle_id, limit)
+                refuels = RefuelAPI.get_all(vehicle_id, limit)
+                result = {'refuels': refuels, 'count': len(refuels)}
             
             # Drivers
             elif path == '/api/drivers':
-                result = DriversAPI.get_all()
+                drivers = DriversAPI.get_all()
+                result = {'drivers': drivers, 'count': len(drivers)}
             
             # Simulation control
             elif path == '/api/simulation/start':
