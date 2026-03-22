@@ -4,33 +4,50 @@
  */
 
 import { API, APIConfig } from './apiService.js';
-import { State, calculateRange } from './state.js';
+import { State } from './state.js';
 import { CONFIG, VEHICLE_PROFILES } from './config.js';
 import { addAlert } from './modules/alerts.js';
+
+function normalizeStatus(status) {
+    const value = String(status || '').toLowerCase();
+    if (value.includes('critical') || value.includes('danger')) return 'danger';
+    if (value.includes('warn') || value.includes('low')) return 'warning';
+    return 'normal';
+}
+
+function calculateRangeFromFuel(fuelPercent, efficiency, capacity) {
+    const fuelLiters = (fuelPercent / 100) * capacity;
+    return Math.round(fuelLiters * efficiency);
+}
 
 /**
  * Transform backend vehicle data to frontend format
  */
 function transformVehicleData(backendVehicle) {
+    const id = backendVehicle.vehicle_id || backendVehicle.id || 'UNKNOWN';
+    const fuel = Number(backendVehicle.fuel ?? 0);
+    const efficiency = Number(backendVehicle.efficiency || backendVehicle.base_efficiency || 12);
+    const capacity = Number(backendVehicle.capacity || 100);
+
     return {
-        id: backendVehicle.id,
-        name: backendVehicle.name,
-        type: backendVehicle.type,
-        fuel: backendVehicle.fuel || 0,
-        efficiency: backendVehicle.efficiency || backendVehicle.base_efficiency || 12,
-        range: backendVehicle.estimated_range || 0,
+        id,
+        name: backendVehicle.name || id,
+        type: backendVehicle.type || 'IoT Vehicle',
+        fuel,
+        efficiency,
+        range: backendVehicle.estimated_range || calculateRangeFromFuel(fuel, efficiency, capacity),
         lat: backendVehicle.latitude || 13.0827,
         lon: backendVehicle.longitude || 80.2707,
-        status: backendVehicle.status || 'normal',
+        status: normalizeStatus(backendVehicle.status),
         alerts: [],
-        speed: backendVehicle.speed || 0,
-        heading: backendVehicle.heading || 'N',
-        engineStatus: backendVehicle.engine_status || 'Idle',
-        gpsStatus: backendVehicle.gps_status || 'Unknown',
-        uptime: '99.8%',
+        speed: Number(backendVehicle.speed || 0),
+        heading: backendVehicle.heading || '--',
+        engineStatus: backendVehicle.engine_status || 'Running',
+        gpsStatus: backendVehicle.gps_status || 'Strong',
+        uptime: 'Live',
         distanceToday: backendVehicle.distance_today || 0,
         driverName: backendVehicle.driver_name || 'Unassigned',
-        capacity: backendVehicle.capacity || 100,
+        capacity,
         mileage: backendVehicle.mileage || 0,
         fuelHistory: []
     };
@@ -40,43 +57,33 @@ function transformVehicleData(backendVehicle) {
  * Fetch vehicles from backend and update state
  */
 async function syncVehicles() {
-    if (!APIConfig.useBackend) return false;
-    
     try {
         const response = await API.vehicles.getAll();
-        if (!response || !response.vehicles) return false;
-        
-        const vehicles = response.vehicles;
-        
-        // Update state with backend data
-        vehicles.forEach(backendVehicle => {
-            const vehicleId = backendVehicle.id;
+        if (!response || Object.keys(response).length === 0) return true;
+
+        const backendVehicles = Array.isArray(response.vehicles) ? response.vehicles : [response];
+
+        for (const backendVehicle of backendVehicles) {
+            const vehicleId = backendVehicle.vehicle_id || backendVehicle.id;
+            if (!vehicleId) {
+                continue;
+            }
+
             const existingVehicle = State.vehicles[vehicleId];
             const transformed = transformVehicleData(backendVehicle);
-            
-            // Preserve fuel history if exists, otherwise initialize
+
             if (existingVehicle && existingVehicle.fuelHistory.length > 0) {
-                transformed.fuelHistory = existingVehicle.fuelHistory;
-                // Add new fuel reading
-                transformed.fuelHistory.push(transformed.fuel);
-                if (transformed.fuelHistory.length > 24) {
-                    transformed.fuelHistory.shift();
-                }
+                transformed.fuelHistory = [...existingVehicle.fuelHistory, transformed.fuel].slice(-24);
             } else {
-                // Initialize with simulated history
-                for (let i = 0; i < 24; i++) {
-                    transformed.fuelHistory.push(transformed.fuel + (Math.random() * 10 - 5));
-                }
+                transformed.fuelHistory = Array(24).fill(transformed.fuel);
             }
-            
-            // Check for status changes and generate alerts
+
             if (existingVehicle) {
                 checkForAlerts(existingVehicle, transformed);
             }
-            
+
             State.vehicles[vehicleId] = transformed;
-            
-            // Update vehicle profiles if not exists
+
             if (!VEHICLE_PROFILES[vehicleId]) {
                 VEHICLE_PROFILES[vehicleId] = {
                     name: transformed.name,
@@ -85,13 +92,13 @@ async function syncVehicles() {
                     baseEfficiency: transformed.efficiency
                 };
             }
-        });
-        
-        // Set selected vehicle if not set
-        if (!State.selectedVehicle && vehicles.length > 0) {
-            State.selectedVehicle = vehicles[0].id;
         }
-        
+
+        const ids = Object.keys(State.vehicles);
+        if (!State.selectedVehicle || !State.vehicles[State.selectedVehicle]) {
+            State.selectedVehicle = ids[0] || '';
+        }
+
         return true;
     } catch (error) {
         console.error('Failed to sync vehicles:', error);
@@ -137,34 +144,30 @@ function checkForAlerts(oldVehicle, newVehicle) {
  * Sync alerts from backend
  */
 async function syncAlerts() {
-    if (!APIConfig.useBackend) return false;
-    
+    if (APIConfig.backendFlavor !== 'full-api') return true;
+
     try {
         const response = await API.alerts.getAll();
-        if (!response || !response.alerts) return false;
-        
-        // Transform and merge with existing alerts
+        if (!response || !Array.isArray(response.alerts)) return true;
+
         const backendAlerts = response.alerts.map(alert => ({
             id: alert.id,
             vehicleId: alert.vehicle_id,
-            type: alert.severity,
+            severity: alert.severity,
             title: alert.title,
             message: alert.message,
-            timestamp: new Date(alert.timestamp).getTime(),
-            resolved: alert.resolved
+            timestamp: new Date(alert.created_at || alert.timestamp).getTime(),
+            resolved: Boolean(alert.resolved)
         }));
-        
-        // Merge with local alerts (avoiding duplicates)
-        const localAlertIds = new Set(State.alertHistory.map(a => a.id));
+
+        const existing = new Set(State.alertHistory.map(a => a.id));
         backendAlerts.forEach(alert => {
-            if (!localAlertIds.has(alert.id)) {
+            if (!existing.has(alert.id)) {
                 State.alertHistory.unshift(alert);
             }
         });
-        
-        // Keep only recent alerts
+
         State.alertHistory = State.alertHistory.slice(0, 100);
-        
         return true;
     } catch (error) {
         console.error('Failed to sync alerts:', error);
@@ -176,37 +179,35 @@ async function syncAlerts() {
  * Sync settings from backend
  */
 async function syncSettings() {
-    if (!APIConfig.useBackend) return false;
-    
+    if (APIConfig.backendFlavor !== 'full-api') return true;
+
     try {
         const response = await API.settings.getAll();
-        if (!response || !response.settings) return false;
-        
-        const settings = response.settings;
-        
-        // Update CONFIG with backend settings
+        const settings = response?.settings;
+        if (!settings) return true;
+
         if (settings.lowFuelThreshold !== undefined) {
-            CONFIG.thresholds.lowFuel = settings.lowFuelThreshold;
+            CONFIG.thresholds.lowFuel = Number(settings.lowFuelThreshold);
         }
         if (settings.criticalFuelThreshold !== undefined) {
-            CONFIG.thresholds.criticalFuel = settings.criticalFuelThreshold;
+            CONFIG.thresholds.criticalFuel = Number(settings.criticalFuelThreshold);
         }
         if (settings.suddenDropThreshold !== undefined) {
-            CONFIG.thresholds.suddenDrop = settings.suddenDropThreshold;
+            CONFIG.thresholds.suddenDrop = Number(settings.suddenDropThreshold);
         }
         if (settings.updateInterval !== undefined) {
-            CONFIG.updateInterval = settings.updateInterval * 1000;
+            CONFIG.updateInterval = Number(settings.updateInterval) * 1000;
         }
         if (settings.gpsEnabled !== undefined) {
-            CONFIG.gps.enabled = settings.gpsEnabled;
+            CONFIG.gps.enabled = Boolean(settings.gpsEnabled);
         }
         if (settings.enableLowFuelAlerts !== undefined) {
-            CONFIG.notifications.lowFuelAlerts = settings.enableLowFuelAlerts;
+            CONFIG.notifications.lowFuelAlerts = Boolean(settings.enableLowFuelAlerts);
         }
         if (settings.enableTheftAlerts !== undefined) {
-            CONFIG.notifications.theftAlerts = settings.enableTheftAlerts;
+            CONFIG.notifications.theftAlerts = Boolean(settings.enableTheftAlerts);
         }
-        
+
         return true;
     } catch (error) {
         console.error('Failed to sync settings:', error);
@@ -218,8 +219,8 @@ async function syncSettings() {
  * Save settings to backend
  */
 async function saveSettingsToBackend(settings) {
-    if (!APIConfig.useBackend) return false;
-    
+    if (APIConfig.backendFlavor !== 'full-api') return true;
+
     try {
         await API.settings.update({
             lowFuelThreshold: settings.lowFuel,
@@ -241,15 +242,13 @@ async function saveSettingsToBackend(settings) {
  * Full data sync from backend
  */
 async function syncAll() {
-    if (!APIConfig.useBackend) return false;
-    
     const results = await Promise.all([
         syncVehicles(),
         syncAlerts(),
         syncSettings()
     ]);
-    
-    return results.every(r => r);
+
+    return results.every(Boolean);
 }
 
 /**
@@ -262,10 +261,9 @@ async function initDataSync() {
         console.log('FleetPulse: Connected to backend');
         await syncAll();
         return true;
-    } else {
-        console.log('FleetPulse: Using local simulation');
-        return false;
     }
+
+    return false;
 }
 
 /**

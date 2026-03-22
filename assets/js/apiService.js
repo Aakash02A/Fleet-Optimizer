@@ -3,25 +3,61 @@
  * Connects frontend to Python backend
  */
 
-const API_BASE = 'http://localhost:8000/api';
-
 // Configuration
 const APIConfig = {
-    useBackend: true,  // Enable backend by default
+    useBackend: true,
     timeout: 10000,
-    autoDetect: true,  // Auto-detect backend availability
-    backendAvailable: false
+    backendAvailable: false,
+    backendFlavor: null,
+    baseUrl: ''
 };
+
+const BACKEND_FLAVORS = {
+    FULL_API: 'full-api',
+    IOT_DATA: 'iot-data'
+};
+
+function getOriginBaseUrl() {
+    if (typeof window === 'undefined' || !window.location) {
+        return '';
+    }
+    if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
+        return window.location.origin;
+    }
+    return '';
+}
+
+function resolveEndpoint(path) {
+    if (APIConfig.backendFlavor === BACKEND_FLAVORS.FULL_API) {
+        return `/api${path}`;
+    }
+    return path;
+}
+
+async function probeBackend(baseUrl, probePath) {
+    try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000);
+        const response = await fetch(`${baseUrl}${probePath}`, {
+            method: 'GET',
+            signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+        return response.ok;
+    } catch {
+        return false;
+    }
+}
 
 /**
  * Generic fetch wrapper with error handling
  */
 async function apiRequest(endpoint, options = {}) {
-    if (!APIConfig.useBackend) {
-        return null; // Use local simulation
+    if (!APIConfig.baseUrl) {
+        throw new Error('Backend not initialized');
     }
-    
-    const url = `${API_BASE}${endpoint}`;
+
+    const url = `${APIConfig.baseUrl}${resolveEndpoint(endpoint)}`;
     const config = {
         headers: {
             'Content-Type': 'application/json',
@@ -62,10 +98,13 @@ async function apiRequest(endpoint, options = {}) {
 
 const VehicleService = {
     /**
-     * Get all vehicles with telemetry
+     * Get latest telemetry from IoT ingest service
      */
     async getAll() {
-        return apiRequest('/vehicles');
+        if (APIConfig.backendFlavor === BACKEND_FLAVORS.FULL_API) {
+            return apiRequest('/vehicles');
+        }
+        return apiRequest('/data');
     },
     
     /**
@@ -363,32 +402,38 @@ const API = {
      */
     setBackendMode(enabled) {
         APIConfig.useBackend = enabled;
-        console.log(`API mode: ${enabled ? 'Backend' : 'Local Simulation'}`);
+        console.log(`API mode: ${enabled ? 'Backend' : 'Offline'}`);
     },
     
     /**
      * Check if backend is available and auto-configure
      */
     async checkBackend() {
-        try {
-            const response = await fetch(`${API_BASE}/simulation/status`, {
-                method: 'GET',
-                signal: AbortSignal.timeout(3000)
-            });
-            APIConfig.backendAvailable = response.ok;
-            if (APIConfig.autoDetect) {
-                APIConfig.useBackend = response.ok;
+        const originBase = getOriginBaseUrl();
+        const candidates = [
+            ...(originBase ? [{ baseUrl: originBase, probe: '/api/simulation/status', flavor: BACKEND_FLAVORS.FULL_API }] : []),
+            { baseUrl: 'http://localhost:8000', probe: '/api/simulation/status', flavor: BACKEND_FLAVORS.FULL_API },
+            { baseUrl: 'http://127.0.0.1:8000', probe: '/api/simulation/status', flavor: BACKEND_FLAVORS.FULL_API },
+            { baseUrl: 'http://localhost:5000', probe: '/data', flavor: BACKEND_FLAVORS.IOT_DATA },
+            { baseUrl: 'http://127.0.0.1:5000', probe: '/data', flavor: BACKEND_FLAVORS.IOT_DATA }
+        ];
+
+        for (const candidate of candidates) {
+            const ok = await probeBackend(candidate.baseUrl, candidate.probe);
+            if (ok) {
+                APIConfig.baseUrl = candidate.baseUrl;
+                APIConfig.backendFlavor = candidate.flavor;
+                APIConfig.backendAvailable = true;
+                console.log(`Backend connected: ${candidate.flavor} @ ${candidate.baseUrl}`);
+                return true;
             }
-            console.log(`Backend ${response.ok ? 'connected' : 'unavailable'}`);
-            return response.ok;
-        } catch {
-            APIConfig.backendAvailable = false;
-            if (APIConfig.autoDetect) {
-                APIConfig.useBackend = false;
-            }
-            console.log('Backend unavailable, using local simulation');
-            return false;
         }
+
+        APIConfig.baseUrl = '';
+        APIConfig.backendFlavor = null;
+        APIConfig.backendAvailable = false;
+        console.log('Backend unavailable');
+        return false;
     },
     
     /**

@@ -4,7 +4,7 @@
  */
 
 import { CONFIG, MODULE_TITLES } from './config.js';
-import { State, initializeVehicleData } from './state.js';
+import { State } from './state.js';
 import { DOM, cacheDOMElements } from './dom.js';
 import { showToast } from './utils.js';
 import { updateDashboard, initDashboardMap } from './modules/dashboard.js';
@@ -12,9 +12,7 @@ import { renderFleetTable, initFleetModule, initFleetMap } from './modules/fleet
 import { renderReports } from './modules/reports.js';
 import { updateAlertBadge, renderAlertsCenter } from './modules/alerts.js';
 import { initializeSettings, saveSettings, resetSettings, setRestartUpdateLoopCallback } from './modules/settings.js';
-import { simulateVehicleData } from './simulation.js';
 import { loadAllViews } from './viewLoader.js';
-import { API, APIConfig } from './apiService.js';
 import { initDataSync, syncVehicles, getSyncStatus } from './dataSync.js';
 
 /**
@@ -62,12 +60,7 @@ function switchModule(module) {
  */
 function startUpdateLoop() {
     State.updateIntervalId = setInterval(async () => {
-        // Use backend sync if available, otherwise local simulation
-        if (APIConfig.useBackend && APIConfig.backendAvailable) {
-            await syncVehicles();
-        } else {
-            simulateVehicleData();
-        }
+        await syncVehicles();
         
         if (State.currentModule === 'dashboard') {
             updateDashboard();
@@ -96,7 +89,11 @@ function restartUpdateLoop() {
  */
 function populateVehicleSelector() {
     const vehicles = Object.values(State.vehicles);
-    if (vehicles.length === 0) return;
+    if (vehicles.length === 0) {
+        DOM.vehicleSelect.innerHTML = '<option value="">No live vehicle data</option>';
+        DOM.vehicleSelect.value = '';
+        return;
+    }
     
     DOM.vehicleSelect.innerHTML = vehicles.map(v => 
         `<option value="${v.id}">${v.id} - ${v.name}</option>`
@@ -125,8 +122,8 @@ function updateConnectionStatus(connected) {
         statusEl.title = 'Connected to Python backend server';
     } else {
         statusEl.className = 'connection-status disconnected';
-        statusText.textContent = 'Local';
-        statusEl.title = 'Using local simulation (backend unavailable)';
+        statusText.textContent = 'Disconnected';
+        statusEl.title = 'Unable to reach Python backend server';
     }
 }
 
@@ -144,6 +141,7 @@ function setupEventListeners() {
     
     // Vehicle selector
     DOM.vehicleSelect.addEventListener('change', (e) => {
+        if (!e.target.value) return;
         State.selectedVehicle = e.target.value;
         updateDashboard();
     });
@@ -152,12 +150,7 @@ function setupEventListeners() {
     DOM.refreshBtn.addEventListener('click', async () => {
         DOM.refreshBtn.classList.add('spinning');
         
-        // Use backend sync if available, otherwise local simulation
-        if (APIConfig.useBackend && APIConfig.backendAvailable) {
-            await syncVehicles();
-        } else {
-            simulateVehicleData();
-        }
+        await syncVehicles();
         
         updateDashboard();
         setTimeout(() => DOM.refreshBtn.classList.remove('spinning'), 1000);
@@ -262,18 +255,15 @@ async function init() {
     // Cache DOM elements after views are loaded
     cacheDOMElements();
     
-    // Initialize local vehicle data first (as fallback)
-    initializeVehicleData();
-    
-    // Try to connect to backend and sync data
+    // Connect to backend and load live data
     const backendConnected = await initDataSync();
     
     if (backendConnected) {
         showToast('Connected to backend server', 'success');
         console.log('FleetPulse: Backend connected');
     } else {
-        showToast('Using local simulation mode', 'info');
-        console.log('FleetPulse: Local simulation mode');
+        showToast('Backend not reachable. Start app.py (8000) or server.py (5000)', 'warning');
+        console.log('FleetPulse: Backend unavailable');
     }
     
     // Update connection status indicator
@@ -281,6 +271,10 @@ async function init() {
     
     // Populate vehicle selector with current vehicles
     populateVehicleSelector();
+
+    if (backendConnected && Object.keys(State.vehicles).length === 0) {
+        showToast('Connected. Waiting for IoT data...', 'info');
+    }
     
     initializeSettings();
     setRestartUpdateLoopCallback(restartUpdateLoop);

@@ -6,6 +6,7 @@
 import { CONFIG } from '../config.js';
 import { DOM } from '../dom.js';
 import { showToast } from '../utils.js';
+import { saveSettingsToBackend } from '../dataSync.js';
 
 let restartUpdateLoopCallback = null;
 
@@ -41,7 +42,7 @@ function initializeSettings() {
 /**
  * Save current settings
  */
-function saveSettings() {
+async function saveSettings() {
     CONFIG.thresholds.lowFuel = parseInt(DOM.lowFuelThreshold.value);
     CONFIG.thresholds.criticalFuel = parseInt(DOM.criticalFuelThreshold.value);
     CONFIG.thresholds.suddenDrop = parseInt(DOM.suddenDropThreshold.value);
@@ -58,6 +59,16 @@ function saveSettings() {
             restartUpdateLoopCallback();
         }
     }
+
+    await saveSettingsToBackend({
+        lowFuel: CONFIG.thresholds.lowFuel,
+        criticalFuel: CONFIG.thresholds.criticalFuel,
+        suddenDrop: CONFIG.thresholds.suddenDrop,
+        updateInterval: CONFIG.updateInterval,
+        gpsEnabled: CONFIG.gps.enabled,
+        lowFuelAlerts: CONFIG.notifications.lowFuelAlerts,
+        theftAlerts: CONFIG.notifications.theftAlerts
+    });
     
     showToast('Settings saved successfully', 'success');
 }

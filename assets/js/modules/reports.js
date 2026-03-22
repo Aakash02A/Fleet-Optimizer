@@ -12,10 +12,34 @@ import { DOM } from '../dom.js';
  */
 function renderReports() {
     const vehicles = getAllVehicles();
+
+    if (vehicles.length === 0) {
+        DOM.totalFuelConsumed.textContent = '0';
+        DOM.totalDistance.textContent = '0';
+        DOM.fuelBreakdown.innerHTML = '<div class="breakdown-item"><span class="breakdown-label">No live data yet</span><span class="breakdown-value">--</span></div>';
+        DOM.efficiencyTrends.innerHTML = '<div class="trend-item"><span class="trend-vehicle">No live data yet</span></div>';
+        DOM.distanceBreakdown.innerHTML = '<div class="breakdown-item"><span class="breakdown-label">No live data yet</span><span class="breakdown-value">--</span></div>';
+        DOM.alertSummaryGrid.innerHTML = `
+            <div class="alert-summary-item critical">
+                <div class="alert-summary-count">0</div>
+                <div class="alert-summary-label">Critical</div>
+            </div>
+            <div class="alert-summary-item warning">
+                <div class="alert-summary-count">0</div>
+                <div class="alert-summary-label">Warnings</div>
+            </div>
+            <div class="alert-summary-item info">
+                <div class="alert-summary-count">0</div>
+                <div class="alert-summary-label">Info</div>
+            </div>
+        `;
+        return;
+    }
     
     // Calculate totals
     const totalFuel = vehicles.reduce((sum, v) => {
-        const consumed = (100 - v.fuel) / 100 * VEHICLE_PROFILES[v.id].capacity;
+        const capacity = VEHICLE_PROFILES[v.id]?.capacity || v.capacity || 100;
+        const consumed = (100 - v.fuel) / 100 * capacity;
         return sum + consumed;
     }, 0);
     
@@ -26,7 +50,8 @@ function renderReports() {
     
     // Fuel breakdown by vehicle
     DOM.fuelBreakdown.innerHTML = vehicles.map(v => {
-        const consumed = ((100 - v.fuel) / 100 * VEHICLE_PROFILES[v.id].capacity).toFixed(1);
+        const capacity = VEHICLE_PROFILES[v.id]?.capacity || v.capacity || 100;
+        const consumed = ((100 - v.fuel) / 100 * capacity).toFixed(1);
         return `
             <div class="breakdown-item">
                 <span class="breakdown-label">${v.name}</span>
@@ -58,9 +83,9 @@ function renderReports() {
     `).join('');
     
     // Alert summary
-    const criticalCount = State.alertHistory.filter(a => a.severity === 'danger').length;
-    const warningCount = State.alertHistory.filter(a => a.severity === 'warning').length;
-    const infoCount = State.alertHistory.filter(a => a.severity === 'info').length;
+    const criticalCount = State.alertHistory.filter(a => (a.severity || a.type) === 'danger').length;
+    const warningCount = State.alertHistory.filter(a => (a.severity || a.type) === 'warning').length;
+    const infoCount = State.alertHistory.filter(a => (a.severity || a.type) === 'info').length;
     
     DOM.alertSummaryGrid.innerHTML = `
         <div class="alert-summary-item critical">

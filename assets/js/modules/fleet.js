@@ -142,7 +142,9 @@ function renderFleetTable(searchFilter = '', statusFilter = 'all') {
     const normalCount = allVehicles.filter(v => v.status === 'normal').length;
     const warningCount = allVehicles.filter(v => v.status === 'warning').length;
     const dangerCount = allVehicles.filter(v => v.status === 'danger').length;
-    const avgEff = allVehicles.reduce((sum, v) => sum + v.efficiency, 0) / allVehicles.length;
+    const avgEff = allVehicles.length
+        ? allVehicles.reduce((sum, v) => sum + v.efficiency, 0) / allVehicles.length
+        : 0;
     const totalCapacity = allVehicles.length * 70; // Assume 70L tank
     const activeCount = allVehicles.filter(v => v.status !== 'idle').length;
     
