@@ -109,6 +109,14 @@ Fleet-Optimizer/
 └── README.md
 ```
 
+## System architecture
+
+The device layer sends vehicle readings to the Python service, which stores telemetry in SQLite and exposes the dashboard and API to the browser.
+
+<p align="center">
+  <img src="src/Circuit%20Diagram.jpeg" alt="FleetPulse circuit diagram" width="780">
+</p>
+
 ## Data model
 
 The extended server is organized around these SQLite tables:
