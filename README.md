@@ -1,251 +1,131 @@
-# FleetPulse - IoT Vehicle Fuel Monitoring Dashboard
+# FleetPulse
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Python-3.8+-blue.svg" alt="Python">
-  <img src="https://img.shields.io/badge/SQLite-3-green.svg" alt="SQLite">
-  <img src="https://img.shields.io/badge/JavaScript-ES6+-yellow.svg" alt="JavaScript">
-  <img src="https://img.shields.io/badge/License-MIT-purple.svg" alt="License">
+  <img src="src/banner.png" alt="FleetPulse fleet intelligence dashboard" width="100%">
 </p>
 
-A production-grade web dashboard for real-time IoT vehicle fuel monitoring. Track fuel levels, detect theft, monitor fleet efficiency, and receive instant alerts - all in one comprehensive platform.
+<p align="center">
+  <strong>See every vehicle clearly. Act before fuel becomes a problem.</strong><br>
+  A lightweight fleet intelligence dashboard for live fuel, location, efficiency, and alert monitoring.
+</p>
 
-## 🚀 Features
+<p align="center">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-1f2937.svg" alt="MIT license"></a>
+  <img src="https://img.shields.io/badge/Python-3.8%2B-3776ab.svg" alt="Python 3.8 or newer">
+  <img src="https://img.shields.io/badge/Frontend-Vanilla%20JS-f7df1e.svg" alt="Vanilla JavaScript">
+  <img src="https://img.shields.io/badge/Storage-SQLite-003b57.svg" alt="SQLite">
+</p>
 
-### Dashboard
-- **Real-time KPIs** - Fuel level, efficiency, estimated range, vehicle status
-- **Live GPS Tracking** - Interactive map with vehicle position updates
-- **Fuel History Charts** - 24-hour fuel consumption visualization
-- **Quick Stats Bar** - Fleet size, daily distance, fuel consumption overview
-- **Vehicle Information** - Detailed vehicle and driver information
-- **Consumption Analytics** - Average consumption, daily/weekly stats, cost estimates
-- **Recent Trips** - Trip history with route, distance, and efficiency data
+## The control room for a moving fleet
 
-### Fleet Management
-- **Vehicle Overview** - Complete fleet status at a glance
-- **Advanced Filtering** - Filter by status (Normal, Warning, Critical)
-- **Sortable Columns** - Sort by ID, fuel level, efficiency
-- **Search Functionality** - Quick vehicle search
-- **Export to CSV** - Download fleet data for reporting
-- **Fleet Map** - Overview of all vehicle locations
+FleetPulse turns vehicle telemetry into a calm, usable operating picture. Monitor the latest fuel reading, position, status, efficiency, and estimated range from one responsive dashboard, then use the API to feed it real device data or local test data.
 
-### Alerts & Notifications
-- **Low Fuel Alerts** - Configurable threshold warnings
-- **Critical Fuel Alerts** - Urgent notifications for critically low levels
-- **Theft Detection** - Sudden fuel drop detection alerts
-- **GPS Lost Alerts** - Connectivity issue notifications
-- **Alert History** - Complete log of all system alerts
+<table>
+<tr>
+<td width="33%"><strong>01 / Observe</strong><br>Latest vehicle telemetry, map coordinates, and fuel history in one view.</td>
+<td width="33%"><strong>02 / Detect</strong><br>Low-fuel, critical-fuel, theft, and connectivity conditions surface as alerts.</td>
+<td width="33%"><strong>03 / Respond</strong><br>Query history, update readings, and connect the dashboard to your workflow.</td>
+</tr>
+</table>
 
-### Reports & Analytics
-- **Fuel Consumption Reports** - Daily, weekly, monthly breakdowns
-- **Efficiency Trends** - Vehicle-by-vehicle efficiency comparison
-- **Distance Tracking** - Total fleet distance covered
-- **Alert Summary** - Statistics on alert types and frequencies
+## What is inside
 
-### Settings
-- **Configurable Thresholds** - Low fuel, critical fuel, sudden drop percentages
-- **Notification Preferences** - Toggle alert types on/off
-- **GPS Settings** - Enable/disable tracking
-- **Update Interval** - Adjust data refresh rate
+| Area | Capabilities |
+| --- | --- |
+| **Live dashboard** | Vehicle ID, fuel level, status, last update, efficiency, range, and map position |
+| **Telemetry API** | Receive readings with `POST /data`; fetch the latest reading with `GET /latest` |
+| **History** | Read the latest 20 fuel samples through `GET /history` for charts and analysis |
+| **Fleet operations** | Vehicle, driver, trip, refuel, settings, and alert data models in the full server |
+| **Frontend** | Plain HTML, CSS, and JavaScript with Leaflet map integration |
+| **Storage** | Local SQLite databases for fast setup and development |
 
-## 🛠️ Tech Stack
+## Run it locally
 
-### Frontend
-- **HTML5** - Semantic markup
-- **CSS3** - Custom properties, Grid, Flexbox, animations
-- **Vanilla JavaScript (ES6+)** - Modular architecture with ES modules
-- **No frameworks** - Pure, lightweight implementation
+### Requirements
 
-### Backend
-- **Python 3.8+** - REST API server
-- **SQLite3** - Embedded database
-- **Built-in HTTP Server** - No external dependencies required
+- Python 3.8 or newer
+- Flask and Flask-CORS for the API server
+- A modern browser
 
-## 📁 Project Structure
+### Start the dashboard
 
+```bash
+pip install flask flask-cors
+python server.py
 ```
+
+Open [http://127.0.0.1:5000](http://127.0.0.1:5000) in your browser. The server creates `fleet.db` on first run and opens the dashboard automatically when debug mode is enabled.
+
+### Send a telemetry reading
+
+```bash
+curl -X POST http://127.0.0.1:5000/data \
+  -H "Content-Type: application/json" \
+  -d '{
+    "vehicle_id": "TN05XY7890",
+    "fuel": 72.5,
+    "latitude": 13.0827,
+    "longitude": 80.2707,
+    "status": "normal",
+    "efficiency": 12.4,
+    "estimated_range": 420
+  }'
+```
+
+## API at a glance
+
+| Method | Route | Purpose |
+| --- | --- | --- |
+| `GET` | `/` | Serve the dashboard |
+| `POST` | `/data` | Store one vehicle telemetry reading |
+| `GET` | `/data` | Return the latest stored reading |
+| `GET` | `/latest` | Return the latest stored reading |
+| `GET` | `/history` | Return the latest 20 fuel readings |
+| `GET` | `/assets/<path>` | Serve frontend assets |
+| `GET` | `/views/<path>` | Serve dashboard views |
+
+The legacy `app.py` server contains the broader FleetPulse REST model, including vehicles, alerts, trips, refuels, drivers, settings, and simulation controls.
+
+## Repository map
+
+```text
 Fleet-Optimizer/
-├── app.py                      # Python backend server
-├── fleetpulse.db              # SQLite database (auto-generated)
-├── index.html                  # Main HTML shell
-├── views/                      # HTML module views
+├── index.html          # Main fleet dashboard
+├── server.py           # Flask API and static-file server
+├── app.py              # Extended SQLite REST server
+├── fleet.db            # Local telemetry database (generated)
+├── src/
+│   ├── banner.png      # README project banner
+│   └── Circuit Diagram.jpeg
+├── views/              # Dashboard view templates
 │   ├── dashboard.html
 │   ├── fleet.html
 │   ├── reports.html
 │   ├── alerts.html
 │   └── settings.html
-├── assets/
-│   ├── css/
-│   │   └── styles.css         # Complete stylesheet
-│   └── js/
-│       ├── app.js             # Main application entry
-│       ├── config.js          # Configuration constants
-│       ├── state.js           # State management
-│       ├── dom.js             # DOM element caching
-│       ├── utils.js           # Utility functions
-│       ├── simulation.js      # Data simulation engine
-│       ├── viewLoader.js      # Dynamic view loading
-│       ├── apiService.js      # Backend API client
-│       └── modules/
-│           ├── dashboard.js   # Dashboard functionality
-│           ├── fleet.js       # Fleet management
-│           ├── reports.js     # Reports & analytics
-│           ├── alerts.js      # Alert handling
-│           └── settings.js    # Settings management
+├── Thonny file/
+│   └── vehicle.py      # Device-side vehicle prototype
+├── LICENSE
 └── README.md
 ```
 
-## 📡 API Reference
+## Data model
 
-### Vehicles
+The extended server is organized around these SQLite tables:
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/vehicles` | List all vehicles with telemetry |
-| GET | `/api/vehicles/{id}` | Get vehicle details |
-| POST | `/api/vehicles` | Create new vehicle |
-| PUT | `/api/vehicles/{id}` | Update vehicle |
-| DELETE | `/api/vehicles/{id}` | Delete vehicle |
-| POST | `/api/vehicles/{id}/telemetry` | Update telemetry data |
+`vehicles` | `vehicle_telemetry` | `fuel_history` | `alerts` | `trips` | `refuel_logs` | `drivers` | `settings`
 
-### Alerts
+Default operating thresholds are a 20% low-fuel warning, a 10% critical-fuel alert, a 5% sudden-drop threshold, and a 3-second update interval.
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/alerts` | List all alerts |
-| GET | `/api/alerts/counts` | Get alert counts by severity |
-| POST | `/api/alerts` | Create new alert |
-| PUT | `/api/alerts/{id}/resolve` | Resolve an alert |
-| DELETE | `/api/alerts/resolved` | Clear resolved alerts |
+## Next horizon
 
-### Reports
+- [ ] Authentication and role-based access
+- [ ] MQTT or CoAP device ingestion
+- [ ] Geofencing and maintenance alerts
+- [ ] Fuel-cost recommendations and predictive analytics
+- [ ] PostgreSQL support for production deployments
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/reports/summary` | Fleet summary statistics |
-| GET | `/api/reports/fuel?period=day` | Fuel consumption report |
-| GET | `/api/reports/efficiency` | Efficiency trends |
+## License
 
-### Settings
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/settings` | Get all settings |
-| PUT | `/api/settings` | Update settings |
-
-### Additional Endpoints
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/trips` | List trip history |
-| POST | `/api/trips` | Log new trip |
-| GET | `/api/refuels` | List refuel logs |
-| POST | `/api/refuels` | Log refuel event |
-| GET | `/api/drivers` | List all drivers |
-| POST | `/api/drivers` | Create driver |
-| PUT | `/api/drivers/{id}` | Update driver |
-| DELETE | `/api/drivers/{id}` | Delete driver |
-
-### Simulation Control
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/simulation/start?interval=3` | Start simulation |
-| GET | `/api/simulation/stop` | Stop simulation |
-| GET | `/api/simulation/status` | Get simulation status |
-
-## 🗄️ Database Schema
-
-### Tables
-
-- **vehicles** - Vehicle profiles and specifications
-- **vehicle_telemetry** - Real-time sensor data
-- **fuel_history** - Historical fuel levels
-- **alerts** - System alerts and notifications
-- **trips** - Journey records
-- **refuel_logs** - Refueling events
-- **drivers** - Driver information
-- **settings** - Configuration storage
-
-## ⚙️ Configuration
-
-### Default Thresholds
-
-| Setting | Default Value |
-|---------|---------------|
-| Low Fuel Warning | 20% |
-| Critical Fuel Alert | 10% |
-| Sudden Drop Detection | 5% |
-| Update Interval | 3 seconds |
-
-### Alert Types
-
-- **Info** - Refuel detected, routine notifications
-- **Warning** - Low fuel warnings
-- **Danger** - Critical fuel, theft detection
-
-## 🎨 UI Components
-
-- Modern card-based layout
-- Responsive design (mobile-friendly)
-- Dark/Light theme ready (CSS variables)
-- Smooth animations and transitions
-- Interactive charts and gauges
-- Status indicators with color coding
-- Toast notifications
-
-## 🔧 Customization
-
-### Adding New Vehicles
-
-```python
-# Via API
-POST /api/vehicles
-{
-    "id": "TN05XY7890",
-    "name": "Truck E",
-    "type": "Heavy Truck",
-    "capacity": 200,
-    "base_efficiency": 12,
-    "driver_name": "New Driver"
-}
-```
-
-### Modifying Thresholds
-
-```python
-# Via API
-PUT /api/settings
-{
-    "lowFuelThreshold": 25,
-    "criticalFuelThreshold": 15,
-    "suddenDropThreshold": 8
-}
-```
-
-## 📊 Sample Data
-
-The system auto-seeds with:
-- 4 sample vehicles (2 Heavy Trucks, 1 Medium Truck, 1 Van)
-- 4 assigned drivers
-- 24-hour fuel history per vehicle
-- 5 sample trips per vehicle
-- Default configuration settings
-
-## 🔒 Security Notes
-
-- CORS enabled for development
-- No authentication (add for production)
-- SQLite for demo (use PostgreSQL/MySQL for production)
-- Input validation on all endpoints
-
-## 🚧 Future Enhancements
-
-- [ ] User authentication & authorization
-- [ ] Multi-tenant support
-- [ ] Real IoT device integration (MQTT/CoAP)
-- [ ] Mobile app (React Native/Flutter)
-- [ ] Advanced analytics & ML predictions
-- [ ] Geofencing alerts
-- [ ] Maintenance scheduling
-- [ ] Fuel cost optimization recommendations
+FleetPulse is available under the [MIT License](LICENSE).
 
